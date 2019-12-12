@@ -1,4 +1,7 @@
 #include <vector>
+
+#include "dot.hpp"
+
 class Environment {
 public:
   Environment();
@@ -7,5 +10,5 @@ public:
 private:
   const unsigned int size_; // Size of the Testground
   std::vector<std::pair<unsigned int, unsigned int>> food_; //Positions of Food
-  std::vector<dot> dots_; //Vector of all dots
+  std::vector<Dot> dots_; //Vector of all dots
 };
