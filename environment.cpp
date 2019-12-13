@@ -6,22 +6,22 @@
 using namespace std;
 
 Environment::Environment():
-  size_(65535)
+  size_(65535),
+  dots_(),
+  food_()
 {
   srand(time(NULL));
-  food_ = vector<pair<uint16_t, uint16_t>>(0);
-  dots_ = vector<Dot>(0);
   tick_ = 0;
   contamination(1000);
   feeding(200);
 }
 
 Environment::Environment(const uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count):
-  size_(testground_size)
+  size_(testground_size),
+  dots_(),
+  food_()
 {
   srand(time(NULL));
-  food_ = vector<pair<uint16_t, uint16_t>>(0);
-  dots_ = vector<Dot>(0);
   tick_ = 0;
   contamination(dot_count);
   feeding(min_food_count, max_food_count);
@@ -75,7 +75,11 @@ void Environment::printTestground(){
   for (size_t i = 0; i < 100; ++i) {
     for (size_t j = 0; j < 100; ++j) {
       if (map_d[i][j] != 0) {
-        cout << ".";
+        if (map_f[i][j] != 0) {
+          cout << "%";
+        } else {
+          cout << ".";
+        }
       } else if (map_f[i][j] != 0) {
         cout << "x";
       } else {
@@ -84,12 +88,12 @@ void Environment::printTestground(){
     }
     cout << endl;
   }
-  cout << endl;
+  cout << "Legende: ' ' Nichts, '.' Dot, 'x' Essen, '%' Dot und Essen\nBei mehreren Objekten auf demselben Punkt wird nur eins angezeigt\nDie Ausgabe ist skaliert auf 100x100" << endl;
 }
 
 int main(int argc, char const *argv[]) {
-  Environment e(65535, 1000, 0, 200);
-  e.tick(100);
+  Environment e(65535, 1, 0, 200);
+  e.tick(10);
   e.printTestground();
   return 0;
 }

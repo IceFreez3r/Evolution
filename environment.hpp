@@ -22,7 +22,7 @@ public:
   void printTestground();
 private:
   const std::uint16_t size_; // Size of the Testground
-  std::vector<std::pair<std::uint16_t, std::uint16_t>> food_; //Positions of Fooda
+  std::vector<std::pair<std::uint16_t, std::uint16_t>> food_; //Positions of Food
   std::vector<Dot> dots_; //Vector of all dots
   uint32_t tick_;
 };
