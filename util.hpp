@@ -1,7 +1,8 @@
 #include <utility>
+#include <cstdint>
 
-uint16_t distance(const std::pair<uint16_t, uint16_t> pos, const std::pair<uint16_t, uint16_t> pos2);
+std::uint16_t distance(const std::pair<std::uint16_t, std::uint16_t> pos, const std::pair<std::uint16_t, std::uint16_t> pos2);
 
-uint16_t direction(const pair<uint16_t, uint16_t> start_pos, pair<uint16_t, uint16_t> target_pos)
+std::uint16_t direction(std::pair<std::uint16_t, std::uint16_t> start_pos, std::pair<std::uint16_t, std::uint16_t> target_pos);
 
-std::pair<uint16_t, uint16_t> move(const std::pair<uint16_t, uint16_t> pos, const uint16_t direction, const uint16_t step_size);
+std::pair<std::uint16_t, std::uint16_t> move(const std::pair<std::uint16_t, std::uint16_t> pos, std::uint16_t direction, const std::uint16_t step_size, const std::uint16_t testground_size);
