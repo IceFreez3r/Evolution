@@ -95,7 +95,7 @@ void Environment::searchFood(Dot &d){
     d.eat(1000);
     food_.erase(food_.begin() + min_index);
     searchFood(d);
-  } else {
+  } else if(min_distance < d.getSight()){
     d.newFoodSource(food_[min_index]);
   }
 }
