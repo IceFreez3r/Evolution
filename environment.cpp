@@ -17,7 +17,7 @@ Environment::Environment():
 }
 
 Environment::Environment(const uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count):
-  size_(testground_size),
+  size_(min(testground_size, (uint16_t)65535)),
   dots_(),
   food_()
 {
@@ -28,11 +28,21 @@ Environment::Environment(const uint16_t testground_size, const int dot_count, co
 }
 
 void Environment::tick(){
-  // sort(food_.begin(),food_.end());
+  // Generate new Food
+  feeding(200);
+  // Trigger Tick of every Dot and delete Dot with 0 energy or less
   for (size_t i = 0; i < dots_.size(); ++i) {
     dots_[i].tick();
+    // Hier irgendwie remove() nutzen
+    // if (dots_[i].energy <= 0) {
+    //   dots_.erase(dots_.begin() + i);
+    // }
+    dots_.erase(remove_if(dots_.begin(), dots_.end(), [](Dot &d){
+      return d.energy <= 0;
+    }), dots_.end());
   }
-  feeding(200);
+  cout << dots_.size() << endl;
+
   ++tick_;
 }
 
@@ -66,7 +76,7 @@ void Environment::printTestground(){
   cout << "Der (skalierte) Testbereich in Tick " << tick_ << ":" << endl;
   vector<vector<int>> map_d(100, vector<int>(100));
   for (size_t i = 0; i < dots_.size(); ++i) {
-    ++map_d[(dots_[i].getPos().first) * 100 / size_][(dots_[i].getPos().second) * 100 / size_];
+    ++map_d[(dots_[i].position.first) * 100 / size_][(dots_[i].position.second) * 100 / size_];
   }
   vector<vector<int>> map_f(100, vector<int>(100));
   for (size_t i = 0; i < food_.size(); ++i) {
@@ -92,8 +102,8 @@ void Environment::printTestground(){
 }
 
 int main(int argc, char const *argv[]) {
-  Environment e(65535, 1, 0, 200);
-  e.tick(10);
+  Environment e(65535, 10, 0, 200);
+  e.tick(1);
   e.printTestground();
   return 0;
 }
