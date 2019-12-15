@@ -8,6 +8,7 @@
 using namespace std;
 
 extern bool debug; // "extern" tells the compiler that debug is already declared somewhere else (environment.cpp)
+bool debug_dot = false;
 
 Dot::Dot(const uint16_t testground_size):
   speed_(10),
