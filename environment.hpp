@@ -18,6 +18,8 @@ public:
   // Places new Foodsources at random locations on the Testground
   void feeding(const int min_amount, const int max_amount);
   void feeding(const int max_amount);
+  // "Tells" a Dot if it can see food
+  void searchFood(Dot d);
   // Prints the Positions of dots and food scaled to a 100x100 matrix
   void printTestground();
 private:

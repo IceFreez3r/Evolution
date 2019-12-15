@@ -3,7 +3,11 @@
 
 #include "environment.hpp"
 
+#include "util.hpp"
+
 using namespace std;
+
+bool debug = false;
 
 Environment::Environment():
   size_(65535),
@@ -30,20 +34,25 @@ Environment::Environment(const uint16_t testground_size, const int dot_count, co
 void Environment::tick(){
   // Generate new Food
   feeding(200);
-  // Trigger Tick of every Dot and delete Dot with 0 energy or less
+  // Trigger Tick of every Dot and let Dots with enough energy replicate
   for (size_t i = 0; i < dots_.size(); ++i) {
+    searchFood(dots_[i]);
     dots_[i].tick();
-    // Hier irgendwie remove() nutzen
-    // if (dots_[i].energy <= 0) {
-    //   dots_.erase(dots_.begin() + i);
-    // }
-    dots_.erase(remove_if(dots_.begin(), dots_.end(), [](Dot &d){
-      return d.energy <= 0;
-    }), dots_.end());
+    if(dots_[i].getReproductionCooldown() <= 0 && dots_[i].getEnergy() >= 5000){
+      dots_.push_back(dots_[i].replicate());
+    }
   }
-  cout << dots_.size() << endl;
-
+  // Delete Dot with 0 energy or less
+  dots_.erase(remove_if(dots_.begin(), dots_.end(), [](Dot &d){
+    return d.getEnergy() <= 0;
+  }), dots_.end());
   ++tick_;
+
+  if(debug || true){
+    cout << "Tick: " << tick_ << endl;
+    cout << "Lebende Dots: " << dots_.size() << endl;
+    cout << "Menge Futter auf dem Testfeld: " << food_.size() << endl;
+  }
 }
 
 void Environment::tick(const int amount){
@@ -63,7 +72,6 @@ void Environment::feeding(const int min_amount, const int max_amount){
   for (size_t i = 0; i < food_count; ++i) {
     uint16_t x = rand() % size_;
     uint16_t y = rand() % size_;
-    // cout << x << "  " << y << '\n';
     food_.push_back(make_pair(x,y));
   }
 }
@@ -72,11 +80,29 @@ void Environment::feeding(const int max_amount){
   feeding(0, max_amount);
 }
 
+void Environment::searchFood(Dot d){
+  // Needs Optimization badly
+  size_t min_index;
+  uint16_t min_distance;
+  for (size_t i = 0; i < food_.size(); ++i) {
+    if(distance(d.getPosition(), food_[i]) < min_distance){
+      min_index = i;
+      min_distance = distance(d.getPosition(), food_[i]);
+    }
+  }
+  if(min_distance == 0){
+    d.eat(1000);
+    food_.erase(food_.begin() + min_index);
+  } else {
+    d.newFoodSource(food_[min_index]);
+  }
+}
+
 void Environment::printTestground(){
   cout << "Der (skalierte) Testbereich in Tick " << tick_ << ":" << endl;
   vector<vector<int>> map_d(100, vector<int>(100));
   for (size_t i = 0; i < dots_.size(); ++i) {
-    ++map_d[(dots_[i].position.first) * 100 / size_][(dots_[i].position.second) * 100 / size_];
+    ++map_d[(dots_[i].getPosition().first) * 100 / size_][(dots_[i].getPosition().second) * 100 / size_];
   }
   vector<vector<int>> map_f(100, vector<int>(100));
   for (size_t i = 0; i < food_.size(); ++i) {
@@ -103,7 +129,7 @@ void Environment::printTestground(){
 
 int main(int argc, char const *argv[]) {
   Environment e(65535, 10, 0, 200);
-  e.tick(1);
+  e.tick(100);
   e.printTestground();
   return 0;
 }
