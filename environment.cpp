@@ -86,9 +86,9 @@ void Environment::searchFood(Dot &d){
   int min_index = -1;
   uint16_t min_distance = -1;
   for (size_t i = 0; i < food_.size(); ++i) {
-    if(distance(d.getPosition(), food_[i]) < min_distance){
+    if(distance(d.getPosition(), food_[i], size_) < min_distance){
       min_index = i;
-      min_distance = distance(d.getPosition(), food_[i]);
+      min_distance = distance(d.getPosition(), food_[i], size_);
     }
   }
   if(min_index != -1 && min_distance == 0){

@@ -53,11 +53,12 @@ Dot::Dot(const Dot &d):
 
 void Dot::tick(){
   if (food_in_sight_) {
-    uint16_t dist = distance(position_,food_in_sight_pos_);
+    uint16_t dist = distance(position_,food_in_sight_pos_, testground_size_);
     if(dist < speed_){
       position_ = food_in_sight_pos_;
       energy_ -= pow(dist, 2);
     } else {
+      direction_ = direction(position_, food_in_sight_pos_, testground_size_);
       position_ = move(position_, direction_, speed_, testground_size_);
       energy_ -= pow(speed_, 2);
     }
