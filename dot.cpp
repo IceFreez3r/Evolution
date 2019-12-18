@@ -56,7 +56,7 @@ void Dot::tick(){
     uint16_t dist = distance(position_,food_in_sight_pos_, testground_size_);
     if(dist < speed_){
       position_ = food_in_sight_pos_;
-      energy_ -= pow(dist, 2);
+      energy_ -= dist * speed_;
     } else {
       direction_ = direction(position_, food_in_sight_pos_, testground_size_);
       position_ = move(position_, direction_, speed_, testground_size_);

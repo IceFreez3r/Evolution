@@ -17,14 +17,17 @@ public:
   void contamination(const int amount);
   // Places new Foodsources at random locations on the Testground
   void feeding(const int min_amount, const int max_amount);
-  void feeding(const int max_amount);
+  void feeding(const int food_count);
   // "Tells" a Dot if it can see food
   void searchFood(Dot &d);
   // Prints the Positions of dots and food scaled to a 100x100 matrix
   void printTestground();
+  void printProperties();
 private:
   const std::uint16_t size_; // Size of the Testground
   std::vector<std::pair<std::uint16_t, std::uint16_t>> food_; //Positions of Food
+  const int min_food_per_tick;
+  const int max_food_per_tick;
   std::vector<Dot> dots_; //Vector of all dots
   uint32_t tick_;
 };
