@@ -18,26 +18,28 @@ uint16_t distance(const pair<uint16_t, uint16_t> pos, const pair<uint16_t, uint1
 }
 
 uint16_t direction(const pair<uint16_t, uint16_t> start_pos, const pair<uint16_t, uint16_t> target_pos, const uint16_t testground_size){
-  int x1 = target_pos.first - start_pos.first;
-  int x2 = (abs(x1 - testground_size)) * signum(x1);
-  int y1 = target_pos.first - start_pos.first;
-  int y2 = (abs(y1 - testground_size)) * signum(y1);
-  int xf;
+  float x1 = target_pos.first - start_pos.first;
+  float x2 = x1 - testground_size * signum(x1);
+  float y1 = target_pos.second - start_pos.second;
+  float y2 = y1 - testground_size * signum(y1);
+  float xf;
   if(abs(x1) <= abs(x2)){
     xf = x1;
   }else {
     xf = x2;
   }
-  int yf;
+  float yf;
   if(abs(y1) <= abs(y2)){
     yf = y1;
   }else {
     yf = y2;
   }
   if(debug || debug_util){
-    cout << "Richtung von (" << start_pos.first << "," << start_pos.second << ") nach (" << target_pos.first << "," << target_pos.second << "): " << atan2((float)(yf), (float)(xf)) / (2 * M_PI) * 360 << endl;
+    cout << x1 << "   " << x2 << "   " << xf << endl;
+    cout << y1 << "   " << y2 << "   " << yf << endl;
+    cout << "Richtung von (" << start_pos.first << "," << start_pos.second << ") nach (" << target_pos.first << "," << target_pos.second << "): " << atan2(yf, xf) / (2 * M_PI) * 360 << endl;
   }
-  return atan2((float)(yf), (float)(xf)) / (2 * M_PI) * 360;
+  return atan2(yf, xf) / (2 * M_PI) * 360;
 }
 
 pair<uint16_t, uint16_t> move(const pair<uint16_t, uint16_t> pos, uint16_t direction, const uint16_t step_size, const uint16_t testground_size){
@@ -50,6 +52,9 @@ pair<uint16_t, uint16_t> move(const pair<uint16_t, uint16_t> pos, uint16_t direc
 }
 
 // Credits to user79758 on https://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
-template <typename T> int signum(T val) {
-    return (T(0) < val) - (val < T(0));
+float signum(float val) {
+    return (0 < val) - (val < 0);
 }
+// template <typename T> int signum(T val) {
+//     return (T(0) < val) - (val < T(0));
+// }

@@ -3,9 +3,9 @@
 class Dot {
 public:
   // Initial constructor
-  Dot(const std::uint16_t testground_size);
+  Dot(const uint16_t testground_size);
   // Replication constructor
-  Dot(const std::uint16_t testground_size, const int energy, const std::uint16_t speed, const std::uint16_t sight, const std::pair<std::uint16_t, std::uint16_t> pos);
+  Dot(const uint16_t testground_size, const int energy, const uint16_t speed, const uint16_t sight, const uint16_t size, const std::pair<uint16_t, uint16_t> pos);
   // Copy constructor
   Dot(const Dot &d);
   // ~Dot(); // Neccessary?
@@ -20,7 +20,7 @@ public:
   Dot replicate();
 
   //Gets triggered by environment if a food is in sight
-  void newFoodSource(std::pair<std::uint16_t, std::uint16_t> food_pos);
+  void newFoodSource(std::pair<uint16_t, uint16_t> food_pos);
   // Gets triggered by the environment if the dot reaches a food source
   void eat(int amount);
 
@@ -29,17 +29,20 @@ public:
   int getReproductionCooldown();
   uint16_t getSpeed();
   uint16_t getSight();
+  uint16_t getSize();
 
 private:
-  // constant properties
-  std::uint16_t speed_; // distance the dot can travel in one tick
-  std::uint16_t sight_; // distance in which the dot can see food and other dots
-  // dynamic properties
+  // Constant properties
+  uint16_t speed_; // distance the dot can travel in one tick
+  uint16_t sight_; // distance in which the dot can see food and other dots
+  uint16_t size_; // size of dots
+
+  // Dynamic properties
   int energy_; // energy the dot, the dot dies when it reaches 0
-  std::pair<std::uint16_t, std::uint16_t> position_; // position on the Testground
+  std::pair<uint16_t, uint16_t> position_; // position on the Testground
   int reproduction_cooldown_; // time until the dot can replicate again
-  std::uint16_t direction_; // direction of movement, (0 right, 90 up, 180 left, 270 down)
-  std::uint16_t testground_size_;
+  uint16_t direction_; // direction of movement, (0 right, 90 up, 180 left, 270 down)
+  uint16_t testground_size_;
   bool food_in_sight_; // True, if a food source in in sight
-  std::pair<std::uint16_t, std::uint16_t> food_in_sight_pos_; // position of the food source in sight
+  std::pair<uint16_t, uint16_t> food_in_sight_pos_; // position of the food source in sight
 };
