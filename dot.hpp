@@ -2,6 +2,7 @@
 
 class Dot {
 public:
+  Dot() = default;
   // Initial constructor
   Dot(const uint16_t testground_size);
   // Replication constructor
@@ -30,6 +31,8 @@ public:
   uint16_t getSpeed();
   uint16_t getSight();
   uint16_t getSize();
+  uint16_t getTestgroundSize();
+  void setTestgroundSize(uint16_t testground_size);
 
 private:
   // Constant properties
@@ -43,6 +46,6 @@ private:
   int reproduction_cooldown_; // time until the dot can replicate again
   uint16_t direction_; // direction of movement, (0 right, 90 up, 180 left, 270 down)
   uint16_t testground_size_;
-  bool food_in_sight_; // True, if a food source in in sight
+  bool food_in_sight_; // True, if a food source is in sight
   std::pair<uint16_t, uint16_t> food_in_sight_pos_; // position of the food source in sight
 };

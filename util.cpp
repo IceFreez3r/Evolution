@@ -9,9 +9,10 @@ extern bool debug;
 bool debug_util = false;
 
 uint16_t distance(const pair<uint16_t, uint16_t> pos, const pair<uint16_t, uint16_t> pos2, const uint16_t testground_size){
-  uint16_t x_diff = min(pos2.first - pos.first, testground_size - abs(pos2.first - pos.first));
-  uint16_t y_diff = min(pos2.second - pos.second, testground_size - abs(pos2.second - pos.second));
+  int x_diff = min(pos2.first - pos.first, testground_size - abs(pos2.first - pos.first));
+  int y_diff = min(pos2.second - pos.second, testground_size - abs(pos2.second - pos.second));
   if(debug || debug_util){
+    cout << "X-Diff: " << x_diff << ", Y-Diff: " << y_diff << endl;
     cout << "Distanz von (" << pos.first << "," << pos.second << ") und (" << pos2.first << "," << pos2.second << "): " << sqrt(pow(x_diff, 2) + pow(y_diff, 2)) << endl;
   }
   return sqrt(pow(x_diff, 2) + pow(y_diff, 2));

@@ -89,6 +89,8 @@ Dot Dot::replicate(){
 }
 
 void Dot::newFoodSource(pair<uint16_t, uint16_t> food_pos){
+  cout << "Ich sehe Essen" << endl;
+  direction_ = direction(position_, food_pos, testground_size_);
   food_in_sight_ = true;
   food_in_sight_pos_ = food_pos;
 }
@@ -98,7 +100,7 @@ void Dot::eat(int amount){
   food_in_sight_ = false;
 }
 
-// Get()-Functions
+// Get()- and Set()-Functions
 int Dot::getEnergy(){
   return energy_;
 }
@@ -117,4 +119,16 @@ uint16_t Dot::getSpeed(){
 
 uint16_t Dot::getSight(){
   return sight_;
+}
+
+uint16_t Dot::getSize(){
+  return size_;
+}
+
+uint16_t Dot::getTestgroundSize(){
+  return testground_size_;
+}
+
+void Dot::setTestgroundSize(uint16_t testground_size){
+  testground_size_ = testground_size;
 }
