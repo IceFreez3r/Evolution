@@ -21,5 +21,5 @@ std::uint16_t direction(const std::pair<uint16_t, uint16_t> start_pos, const std
 std::pair<std::uint16_t, std::uint16_t> move(const std::pair<std::uint16_t, std::uint16_t> pos, std::uint16_t direction, const std::uint16_t step_size, const std::uint16_t testground_size);
 
 // Returns -1 for x < 0, 0 for x = 0, 1 for x > 0
-float signum(float val);
+int signum(float val);
 // template <typename T> int signum(T val);

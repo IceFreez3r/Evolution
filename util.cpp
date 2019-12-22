@@ -53,7 +53,7 @@ pair<uint16_t, uint16_t> move(const pair<uint16_t, uint16_t> pos, uint16_t direc
 }
 
 // Credits to user79758 on https://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
-float signum(float val) {
+int signum(float val) {
     return (0 < val) - (val < 0);
 }
 // template <typename T> int signum(T val) {
