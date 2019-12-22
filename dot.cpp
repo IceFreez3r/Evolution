@@ -11,10 +11,8 @@ extern bool debug; // "extern" tells the compiler that debug is already declared
 bool debug_dot = false;
 
 Dot::Dot(const uint16_t testground_size):
-//start dots
   speed_(10),
-  sight_(50),
-  size_(5)
+  sight_(50)
 {
   energy_ = 5000;
   reproduction_cooldown_ = 20;
@@ -27,11 +25,9 @@ Dot::Dot(const uint16_t testground_size):
   food_in_sight_pos_ = make_pair(0,0);
 }
 
-Dot::Dot(const uint16_t testground_size, const int energy, const uint16_t speed, const uint16_t sight, const uint16_t size, const pair<uint16_t, uint16_t> pos):
-// start dots or replication
+Dot::Dot(const uint16_t testground_size, const int energy, const uint16_t speed, const uint16_t sight, const pair<uint16_t, uint16_t> pos):
   speed_(speed),
-  sight_(sight),
-  size_(size)
+  sight_(sight)
 {
   energy_ = energy;
   reproduction_cooldown_ = 20;
@@ -44,8 +40,7 @@ Dot::Dot(const uint16_t testground_size, const int energy, const uint16_t speed,
 
 Dot::Dot(const Dot &d):
   speed_(d.speed_),
-  sight_(d.sight_),
-  size_(d.size_)
+  sight_(d.sight_)
 {
   energy_ = d.energy_;
   position_ = d.position_;
@@ -58,12 +53,11 @@ Dot::Dot(const Dot &d):
 
 void Dot::tick(){
   if (food_in_sight_) {
-    uint16_t dist = distance(position_,food_in_sight_pos_, testground_size_);
+    uint16_t dist = distance(position_,food_in_sight_pos_);
     if(dist < speed_){
       position_ = food_in_sight_pos_;
-      energy_ -= dist * speed_;
+      energy_ -= pow(dist, 2);
     } else {
-      direction_ = direction(position_, food_in_sight_pos_, testground_size_);
       position_ = move(position_, direction_, speed_, testground_size_);
       energy_ -= pow(speed_, 2);
     }
@@ -73,24 +67,20 @@ void Dot::tick(){
     energy_ -= pow(speed_, 2);
   }
 
-  energy_ -= sight_ + size_;
+  energy_ -= sight_;
   --reproduction_cooldown_;
 }
 
 Dot Dot::replicate(){
   uint16_t x_new = (position_.first + rand() % (sight_ * 2 + 1) - sight_) % testground_size_;
   uint16_t y_new = (position_.second + rand() % (sight_ * 2 + 1) - sight_) % testground_size_;
-  uint16_t speed_new = max(speed_ + rand() % 5 - 2, 1);
-  uint16_t sight_new = max(sight_ + rand() % 7 - 3, 1);
-  Dot child(testground_size_, energy_/2, speed_new, sight_new, size_, make_pair(x_new, y_new));
+  Dot child(testground_size_, energy_/2, speed_ + rand() % 5 - 2, sight_ + rand() % 7 - 3, make_pair(x_new, y_new));
   energy_ /= 2;
   reproduction_cooldown_ = 20;
   return child;
 }
 
-void Dot::newFoodSource(pair<uint16_t, uint16_t> food_pos){
-  cout << "Ich sehe Essen" << endl;
-  direction_ = direction(position_, food_pos, testground_size_);
+void Dot::newFoodSource(std::pair<std::uint16_t, std::uint16_t> food_pos){
   food_in_sight_ = true;
   food_in_sight_pos_ = food_pos;
 }
@@ -100,12 +90,12 @@ void Dot::eat(int amount){
   food_in_sight_ = false;
 }
 
-// Get()- and Set()-Functions
+// Get()-Functions
 int Dot::getEnergy(){
   return energy_;
 }
 
-pair<uint16_t, uint16_t> Dot::getPosition(){
+std::pair<std::uint16_t, std::uint16_t> Dot::getPosition(){
   return position_;
 }
 
@@ -119,16 +109,4 @@ uint16_t Dot::getSpeed(){
 
 uint16_t Dot::getSight(){
   return sight_;
-}
-
-uint16_t Dot::getSize(){
-  return size_;
-}
-
-uint16_t Dot::getTestgroundSize(){
-  return testground_size_;
-}
-
-void Dot::setTestgroundSize(uint16_t testground_size){
-  testground_size_ = testground_size;
 }
