@@ -44,8 +44,8 @@ uint16_t direction(const pair<uint16_t, uint16_t> start_pos, const pair<uint16_t
 }
 
 pair<uint16_t, uint16_t> move(const pair<uint16_t, uint16_t> pos, uint16_t direction, const uint16_t step_size, const uint16_t testground_size){
-  uint16_t x_new = (uint16_t)(cos(((float)direction)/360 * 2 * M_PI) * step_size + pos.first) % testground_size;
-  uint16_t y_new = (uint16_t)(sin(((float)direction)/360 * 2 * M_PI) * step_size + pos.second) % testground_size;
+  uint16_t x_new = ((int)(cos(((float)direction)/360 * 2 * M_PI) * step_size) + pos.first + testground_size) % testground_size;
+  uint16_t y_new = ((int)(sin(((float)direction)/360 * 2 * M_PI) * step_size) + pos.second + testground_size) % testground_size;
   if(debug || debug_util){
     cout << "Neue Position von (" << pos.first << "," << pos.second << ") in Richtung " << direction << " und Weite " << step_size << ": (" << x_new << "," << y_new << ")\n";
   }
