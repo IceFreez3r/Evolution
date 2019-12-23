@@ -44,9 +44,10 @@ To create the Testground you have multiple options:
     This lets you customize the options of the Testground on your own, but will still use the standard values for Dots.
 3. The super custom option
     ```C++
+    Dot start_dot(uint16_t testground_size, int energy, uint16_t speed, uint16_t sight, uint16_t size, std::pair<uint16_t, uint16_t> pos);
     Environment e(uint16_t testground_size, int dot_count, int min_food_count, int max_food_count, Dot start_dot)
     ```
-    Basically the same as the second option, but if you create a Dot first and deliver it to the constructor, every generated Dot from the start will be a copy of it.  
+    Basically the same as the second option, but if you create a Dot first and deliver it to the constructor, every generated Dot from the start will be a copy of it. If the `testground_size` is different in the Dot and the Environment, the one from the Environment will be copied into the Dot at first. If the `pos`of the Dot is outside the Testground, this may lead to some undefined behaviour (at the moment), but probably every Dot will be moved inside the Testground after one step.
     
 To then run the simulation, use tick():  
 ```C++
