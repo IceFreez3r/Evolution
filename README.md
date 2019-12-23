@@ -47,6 +47,7 @@ To create the Testground you have multiple options:
     Environment e(uint16_t testground_size, int dot_count, int min_food_count, int max_food_count, Dot start_dot)
     ```
     Basically the same as the second option, but if you create a Dot first and deliver it to the constructor, every generated Dot from the start will be a copy of it.  
+    
 To then run the simulation, use tick():  
 ```C++
 e.tick(); // One tick
