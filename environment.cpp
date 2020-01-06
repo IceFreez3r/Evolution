@@ -15,10 +15,10 @@ bool debug_env = false;
 
 Environment::Environment():
   testground_size_(65535),
-  dots_(),
   food_(),
   min_food_per_tick_(0),
-  max_food_per_tick_(200)
+  max_food_per_tick_(200),
+  dots_()
 {
   srand(time(NULL));
   tick_ = 0;
@@ -28,10 +28,10 @@ Environment::Environment():
 
 Environment::Environment(const uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count):
   testground_size_(min(testground_size, (uint16_t)65535)),
-  dots_(),
   food_(),
   min_food_per_tick_(min_food_count),
-  max_food_per_tick_(max_food_count)
+  max_food_per_tick_(max_food_count),
+  dots_()
 {
   srand(time(NULL));
   tick_ = 0;
@@ -41,10 +41,10 @@ Environment::Environment(const uint16_t testground_size, const int dot_count, co
 
 Environment::Environment(const uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count, const Dot start_dot):
   testground_size_(min(testground_size, (uint16_t)65535)),
-  dots_(),
   food_(),
   min_food_per_tick_(min_food_count),
-  max_food_per_tick_(max_food_count)
+  max_food_per_tick_(max_food_count),
+  dots_()
 {
   srand(time(NULL));
   tick_ = 0;
@@ -93,7 +93,7 @@ void Environment::feeding(const int min_amount, const int max_amount){
     return;
   }
   int food_count = rand() % (max_amount - min_amount) + min_amount;
-  for (size_t i = 0; i < food_count; ++i) {
+  for (int i = 0; i < food_count; ++i) {
     uint16_t x = rand() % testground_size_;
     uint16_t y = rand() % testground_size_;
     food_.push_back(make_pair(x,y));
@@ -101,7 +101,7 @@ void Environment::feeding(const int min_amount, const int max_amount){
 }
 
 void Environment::feeding(const int food_count){
-  for (size_t i = 0; i < food_count; ++i) {
+  for (int i = 0; i < food_count; ++i) {
     uint16_t x = rand() % testground_size_;
     uint16_t y = rand() % testground_size_;
     food_.push_back(make_pair(x,y));
@@ -203,7 +203,7 @@ void Environment::printProperties(){
       sum_speed += dot_speed;
       sum_energy += dot_energy;
     }
-    cout << "Min-/Max-/Avgwerte von " << dots_.size() << " Dots in Tick " << tick_ << ": " << endl;
+    cout << "\nMin-/Max-/Avgwerte von " << dots_.size() << " Dots in Tick " << tick_ << ": " << endl;
     cout << "SIGHT: " << min_sight << "/" << max_sight << "/" <<(float)sum_sight/dots_.size() << endl;
     cout << "SPEED: " << min_speed << "/" << max_speed << "/" <<(float)sum_speed/dots_.size() << endl;
     cout << "ENERGY: " << min_energy << "/" << max_energy << "/" <<(float)sum_energy/dots_.size() << endl;
