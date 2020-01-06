@@ -88,7 +88,7 @@ void Environment::contamination(const int amount){
 }
 
 void Environment::feeding(const int min_amount, const int max_amount){
-  if (min_amount == max_amount) {
+  if (min_amount >= max_amount) {
     feeding(min_amount);
     return;
   }
@@ -129,7 +129,7 @@ void Environment::searchFood(Dot &d){
   }
 }
 
-void Environment::printTestground(){
+void Environment::printMap(){
   uint16_t scale = min((uint16_t)100, testground_size_);
   cout << "Der (skalierte) Testbereich in Tick " << tick_ << ":" << endl;
   vector<vector<int>> map_d(scale, vector<int>(scale));
@@ -157,6 +157,10 @@ void Environment::printTestground(){
     cout << endl;
   }
   cout << "Legende: ' ' Nichts, '.' Dot, 'x' Essen, '%' Dot und Essen\nBei mehreren Objekten auf demselben Punkt wird nur eins angezeigt\nDie Ausgabe ist skaliert auf 100x100" << endl;
+}
+
+void Environment::printTestground(){
+  cout << "Testgroundsize: " << testground_size_ << "\nMin-|Maxfutter pro Tick: " << min_food_per_tick_ << "|"<< max_food_per_tick_ << "\nTick: " << tick_ << "\n#Dots: " << dots_.size() << "\n#Futter: " << food_.size();
 }
 
 void Environment::printProperties(){
@@ -204,11 +208,13 @@ void Environment::printProperties(){
     cout << "SPEED: " << min_speed << "/" << max_speed << "/" <<(float)sum_speed/dots_.size() << endl;
     cout << "ENERGY: " << min_energy << "/" << max_energy << "/" <<(float)sum_energy/dots_.size() << endl;
     cout << "Im aktuellen Tick sind " << food_.size() << " Futterstuecke auf dem Feld" << endl;
-    int n = food_.size();
-    int dots = dots_.size();
-    int sum = 2 * n * log(n) + 2 * dots * (log(n) + log(n/2) + pow(n * (sum_sight / dots) / testground_size_,2) + 2 * n * pow((sum_sight / dots) / testground_size_, 2));
-    int sum2 = n * log(n) + dots * (log(n) + log(n/2) + 2 * n * (sum_sight / dots) / testground_size_);
-    cout << n*dots << endl << sum << endl << sum2 << endl;
+    if(debug || debug_env){
+      int f = food_.size();
+      int dots = dots_.size();
+      int sum = 2 * f * log(f) + 2 * dots * (log(f) + log(f / 2) + pow(f * (sum_sight / dots) / testground_size_,2) + 2 * f * pow((sum_sight / dots) / testground_size_, 2));
+      int sum2 = f * log(f) + dots * (log(f) + log(f / 2) + 2 * f * (sum_sight / dots) / testground_size_);
+      cout << "Laufzeitanalyse Futtersuche (geschätzte Werte):\nNaiver Ansatz: " << f * dots << "\nSchnitt aus Intervallen aus sortierten Listen: " << sum << "\nIntervall einer sortierten Liste:  " << sum2 << endl;
+    }
   } else {
     cout << "Im Tick " << tick_ << " sind keine Dots mehr am Leben." << endl;
   }

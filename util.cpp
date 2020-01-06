@@ -36,8 +36,8 @@ uint16_t direction(const pair<uint16_t, uint16_t> start_pos, const pair<uint16_t
     yf = y2;
   }
   if(debug || debug_util){
-    cout << x1 << "   " << x2 << "   " << xf << endl;
-    cout << y1 << "   " << y2 << "   " << yf << endl;
+    cout << "x1|x2|xfinal" << x1 << "|" << x2 << "|" << xf << endl;
+    cout << "y1|y2|yfinal" << y1 << "|" << y2 << "|" << yf << endl;
     cout << "Richtung von (" << start_pos.first << "," << start_pos.second << ") nach (" << target_pos.first << "," << target_pos.second << "): " << atan2(yf, xf) / (2 * M_PI) * 360 << endl;
   }
   return atan2(yf, xf) / (2 * M_PI) * 360;

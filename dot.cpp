@@ -89,7 +89,6 @@ Dot Dot::replicate(){
 }
 
 void Dot::newFoodSource(pair<uint16_t, uint16_t> food_pos){
-  cout << "Ich sehe Essen" << endl;
   direction_ = direction(position_, food_pos, testground_size_);
   food_in_sight_ = true;
   food_in_sight_pos_ = food_pos;
