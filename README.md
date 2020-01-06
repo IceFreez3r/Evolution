@@ -54,7 +54,11 @@ To then run the simulation, use tick():
 e.tick(); // One tick
 e.tick(amount); // As many ticks at once as you like
 ```
-To print the Testground, use printTestground():  
+To get a (scaled) map with Dots and food sources, use printMap():  
+```C++
+e.printMap();
+```
+To print the properties  of the Testground, use printTestground():  
 ```C++
 e.printTestground();
 ```
