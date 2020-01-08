@@ -16,7 +16,7 @@ Dot::Dot(const uint16_t testground_size):
   sight_(50),
   size_(5)
 {
-  energy_ = 5000;
+  energy_ = 7500;
   reproduction_cooldown_ = 20;
   testground_size_ = testground_size;
   uint16_t x = rand() % testground_size_;

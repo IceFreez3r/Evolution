@@ -12,8 +12,8 @@ uint16_t distance(const pair<uint16_t, uint16_t> pos, const pair<uint16_t, uint1
   int x_diff = min(pos2.first - pos.first, testground_size - abs(pos2.first - pos.first));
   int y_diff = min(pos2.second - pos.second, testground_size - abs(pos2.second - pos.second));
   if(debug || debug_util){
-    cout << "X-Diff: " << x_diff << ", Y-Diff: " << y_diff << endl;
-    cout << "Distanz von (" << pos.first << "," << pos.second << ") und (" << pos2.first << "," << pos2.second << "): " << sqrt(pow(x_diff, 2) + pow(y_diff, 2)) << endl;
+    cout << "X-Diff: " << x_diff << ", Y-Diff: " << y_diff;
+    cout << "\nDistanz von (" << pos.first << "," << pos.second << ") und (" << pos2.first << "," << pos2.second << "): " << sqrt(pow(x_diff, 2) + pow(y_diff, 2)) << "\n";
   }
   return sqrt(pow(x_diff, 2) + pow(y_diff, 2));
 }
@@ -36,9 +36,9 @@ uint16_t direction(const pair<uint16_t, uint16_t> start_pos, const pair<uint16_t
     yf = y2;
   }
   if(debug || debug_util){
-    cout << "x1|x2|xfinal" << x1 << "|" << x2 << "|" << xf << endl;
-    cout << "y1|y2|yfinal" << y1 << "|" << y2 << "|" << yf << endl;
-    cout << "Richtung von (" << start_pos.first << "," << start_pos.second << ") nach (" << target_pos.first << "," << target_pos.second << "): " << atan2(yf, xf) / (2 * M_PI) * 360 << endl;
+    cout << "x1|x2|xfinal" << x1 << "|" << x2 << "|" << xf;
+    cout << "\ny1|y2|yfinal" << y1 << "|" << y2 << "|" << yf;
+    cout << "\nRichtung von (" << start_pos.first << "," << start_pos.second << ") nach (" << target_pos.first << "," << target_pos.second << "): " << atan2(yf, xf) / (2 * M_PI) * 360 << "\n";
   }
   return atan2(yf, xf) / (2 * M_PI) * 360;
 }
