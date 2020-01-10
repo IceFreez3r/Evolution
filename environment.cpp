@@ -14,7 +14,6 @@ bool debug = false;
 bool debug_env = false;
 
 Environment::Environment():
-  // generates default environment
   testground_size_(65535),
   food_(),
   min_food_per_tick_(0),
@@ -28,7 +27,6 @@ Environment::Environment():
 }
 
 Environment::Environment(const uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count):
-  // generates environment with given values, without start dots
   testground_size_(min(testground_size, (uint16_t)65535)),
   food_(),
   min_food_per_tick_(min_food_count),
@@ -42,7 +40,6 @@ Environment::Environment(const uint16_t testground_size, const int dot_count, co
 }
 
 Environment::Environment(const uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count, const Dot start_dot):
-  // generates environment with given values and start dots
   testground_size_(min(testground_size, (uint16_t)65535)),
   food_(),
   min_food_per_tick_(min_food_count),
@@ -147,8 +144,7 @@ void Environment::printMap(){
   cout << "Der (skalierte) Testbereich in Tick " << tick_ << ":\n";
   vector<vector<int>> map_d(scale, vector<int>(scale));
   for (size_t i = 0; i < dots_.size(); ++i) {
-    ++map_d
-    [(dots_[i].getPosition().first) * scale / testground_size_][(dots_[i].getPosition().second) * scale / testground_size_];
+    ++map_d[(dots_[i].getPosition().first) * scale / testground_size_][(dots_[i].getPosition().second) * scale / testground_size_];
   }
   vector<vector<int>> map_f(scale, vector<int>(scale));
   for (size_t i = 0; i < food_.size(); ++i) {

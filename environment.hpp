@@ -6,20 +6,26 @@
 class Environment {
 public:
   // Standard Constructor
+  // generates default environment
   Environment();
   // Custom Constructor
+  // generates environment with given values, with generic start Dots
   Environment(const std::uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count);
+  // generates environment with given values and start Dots
   Environment(const std::uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count, const Dot start_dot);
-   // Triggers tick() function of every dot and runs feeding(...), if amount is given the function is repeated multiple times
+   // Triggers tick() function of every Dot and runs feeding(...), if amount is given the function is repeated multiple times
   void tick(const int amount = 1);
-  // Places new dots on the Testground with standard properties
+  // Places new Dots on the Testground with standard properties
   void contamination(const int amount);
   // Places new Foodsources at random locations on the Testground
-  void feeding(const int min_amount, const int max_amount); // (?) können wir zusammenschrumpfen, dann brauchen wir nicht 2x den gleichen code.
-  void feeding(const int food_count);
+  // If only min_amount is given or min_amount is greater than max_amount,
+  // exactly min_amount Foodsources are generated
+  // If min and max_amount are given, the function generates a random number
+  // between them and places that many Foodsources
+  void feeding(const int min_amount, const int max_amount = 0);
   // "Tells" a Dot if it can see food
   void searchFood();
-  // Prints the Positions of dots and food scaled to a 100x100 matrix
+  // Prints the Positions of Dots and food scaled to a 100x100 matrix
   void printMap();
   void printTestground();
   void printProperties();
@@ -29,6 +35,6 @@ private:
   const int min_food_per_tick_;
   const int max_food_per_tick_;
   Dot start_dot_;
-  std::vector<Dot> dots_; //Vector of all dots
+  std::vector<Dot> dots_; //Vector of all Dots
   uint32_t tick_;
 };
