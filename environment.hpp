@@ -22,7 +22,7 @@ public:
   // Prints the Positions of dots and food scaled to a 100x100 matrix
   void printMap();
   void printTestground();
-  int printProperties();
+  void printProperties();
 private:
   const std::uint16_t testground_size_; // Size of the Testground
   std::vector<std::pair<std::uint16_t, std::uint16_t>> food_; //Positions of Food

@@ -4,8 +4,6 @@
 #include <time.h>
 #include <math.h>
 
-#include <omp.h>
-
 #include "environment.hpp"
 
 #include "util.hpp"
@@ -14,7 +12,6 @@ using namespace std;
 
 bool debug = false;
 bool debug_env = false;
-double search_time = 0.0;
 
 Environment::Environment():
   testground_size_(65535),
@@ -188,7 +185,7 @@ void Environment::printTestground(){
   cout << "Testgroundsize: " << testground_size_ << "\nMin-|Maxfutter pro Tick: " << min_food_per_tick_ << "|"<< max_food_per_tick_ << "\nTick: " << tick_ << "\n#Dots: " << dots_.size() << "\n#Futter: " << food_.size();
 }
 
-int Environment::printProperties(){
+void Environment::printProperties(){
   if(dots_.size() != 0){
     uint16_t min_speed = ~0;
     uint16_t max_speed = 0;
