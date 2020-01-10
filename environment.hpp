@@ -15,7 +15,7 @@ public:
   // Places new dots on the Testground with standard properties
   void contamination(const int amount);
   // Places new Foodsources at random locations on the Testground
-  void feeding(const int min_amount, const int max_amount);
+  void feeding(const int min_amount, const int max_amount); // (?) können wir zusammenschrumpfen, dann brauchen wir nicht 2x den gleichen code.
   void feeding(const int food_count);
   // "Tells" a Dot if it can see food
   void searchFood();

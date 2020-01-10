@@ -14,6 +14,7 @@ bool debug = false;
 bool debug_env = false;
 
 Environment::Environment():
+  // generates default environment
   testground_size_(65535),
   food_(),
   min_food_per_tick_(0),
@@ -27,6 +28,7 @@ Environment::Environment():
 }
 
 Environment::Environment(const uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count):
+  // generates environment with given values, without start dots
   testground_size_(min(testground_size, (uint16_t)65535)),
   food_(),
   min_food_per_tick_(min_food_count),
@@ -40,6 +42,7 @@ Environment::Environment(const uint16_t testground_size, const int dot_count, co
 }
 
 Environment::Environment(const uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count, const Dot start_dot):
+  // generates environment with given values and start dots
   testground_size_(min(testground_size, (uint16_t)65535)),
   food_(),
   min_food_per_tick_(min_food_count),
@@ -87,20 +90,13 @@ void Environment::contamination(const int amount){
   }
 }
 
-void Environment::feeding(const int min_amount, const int max_amount){
+void Environment::feeding(const int min_amount, const int max_amount /* = 0 */){
+  int food_count;
   if (min_amount >= max_amount) {
-    feeding(min_amount);
-    return;
+    food_count = min_amount;
+  } else {
+    food_count = rand() % (max_amount - min_amount) + min_amount;
   }
-  int food_count = rand() % (max_amount - min_amount) + min_amount;
-  for (int i = 0; i < food_count; ++i) {
-    uint16_t x = rand() % testground_size_;
-    uint16_t y = rand() % testground_size_;
-    food_.push_back(make_pair(x,y));
-  }
-}
-
-void Environment::feeding(const int food_count){
   for (int i = 0; i < food_count; ++i) {
     uint16_t x = rand() % testground_size_;
     uint16_t y = rand() % testground_size_;
@@ -109,8 +105,6 @@ void Environment::feeding(const int food_count){
 }
 
 void Environment::searchFood(){
-  double time_end, time_start = omp_get_wtime();
-
   sort(food_.begin(), food_.end());
   if (debug || debug_env) {
     for (size_t i = 0; i < food_.size(); ++i) {
@@ -146,9 +140,6 @@ void Environment::searchFood(){
       dots_[i].newFoodSource(food_[min_it - food_.begin()]);
     }
   }
-
-  time_end = omp_get_wtime();
-  search_time += time_end - time_start;
 }
 
 void Environment::printMap(){
@@ -156,7 +147,8 @@ void Environment::printMap(){
   cout << "Der (skalierte) Testbereich in Tick " << tick_ << ":\n";
   vector<vector<int>> map_d(scale, vector<int>(scale));
   for (size_t i = 0; i < dots_.size(); ++i) {
-    ++map_d[(dots_[i].getPosition().first) * scale / testground_size_][(dots_[i].getPosition().second) * scale / testground_size_];
+    ++map_d
+    [(dots_[i].getPosition().first) * scale / testground_size_][(dots_[i].getPosition().second) * scale / testground_size_];
   }
   vector<vector<int>> map_f(scale, vector<int>(scale));
   for (size_t i = 0; i < food_.size(); ++i) {
