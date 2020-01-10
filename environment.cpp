@@ -60,8 +60,8 @@ void Environment::tick(const int amount /* = 1 */){
     // Generate new Food
     feeding(min_food_per_tick_, max_food_per_tick_);
     // Trigger Tick of every Dot and let Dots with enough energy replicate
+    searchFood();
     for (size_t i = 0; i < dots_.size(); ++i) {
-      searchFood(dots_[i]);
       dots_[i].tick();
       if(dots_[i].getReproductionCooldown() <= 0 && dots_[i].getEnergy() >= 5000){
         dots_.push_back(dots_[i].replicate());
@@ -74,9 +74,9 @@ void Environment::tick(const int amount /* = 1 */){
     ++tick_;
 
     if(debug || debug_env){
-      cout << "Tick: " << tick_ << endl;
-      cout << "Lebende Dots: " << dots_.size() << endl;
-      cout << "Menge Futter auf dem Testfeld: " << food_.size() << endl;
+      cout << "Tick: " << tick_;
+      cout << "\nLebende Dots: " << dots_.size();
+      cout << "\nMenge Futter auf dem Testfeld: " << food_.size() << "\n";
     }
   }
 }
@@ -108,30 +108,52 @@ void Environment::feeding(const int food_count){
   }
 }
 
-void Environment::searchFood(Dot &d){
+void Environment::searchFood(){
+  double time_end, time_start = omp_get_wtime();
+
   sort(food_.begin(), food_.end());
-  // Needs Optimization badly
-  int min_index = -1;
-  uint16_t min_distance = ~0;
-  for (size_t i = 0; i < food_.size(); ++i) {
-    uint16_t dist = distance(d.getPosition(), food_[i], testground_size_);
-    if(dist < min_distance){
-      min_index = i;
-      min_distance = dist;
+  if (debug || debug_env) {
+    for (size_t i = 0; i < food_.size(); ++i) {
+      cout << "(" << food_[i].first << "," << food_[i].first << ")\n";
     }
   }
-  if(min_index != -1 && min_distance == 0){
-    d.eat(1000);
-    food_.erase(food_.begin() + min_index);
-    searchFood(d);
-  } else if(min_distance < d.getSight()){
-    d.newFoodSource(food_[min_index]);
+  for (size_t i = 0; i < dots_.size(); ++i) {
+    // Find interval for x values of food_
+    uint16_t min_x = (dots_[i].getPosition().first - dots_[i].getSight() + testground_size_) % testground_size_;
+    uint16_t max_x = (dots_[i].getPosition().first + dots_[i].getSight() + testground_size_) % testground_size_;
+    auto start = find_if(food_.begin(), food_.end(), [&min_x](const pair<uint16_t, uint16_t>& food) {
+      return food.first >= min_x;
+    });
+    auto end = find_if(food_.begin(), food_.end(), [&max_x](const pair<uint16_t, uint16_t>& food) {
+      return food.first > max_x;
+    });
+    // Calculate exact distance for food in interval
+    auto min_it = end;
+    uint16_t min_distance = ~0;
+    for (auto j = start; j < end; ++j) {
+      uint16_t dist = distance(dots_[i].getPosition(), food_[j - food_.begin()], testground_size_);
+      if(dist < min_distance){
+        min_it = j;
+        min_distance = dist;
+      }
+    }
+
+    if(min_it != end && min_distance == 0){
+      dots_[i].eat(1000);
+      food_.erase(min_it);
+      searchFood();
+    } else if(min_distance < dots_[i].getSight()){
+      dots_[i].newFoodSource(food_[min_it - food_.begin()]);
+    }
   }
+
+  time_end = omp_get_wtime();
+  search_time += time_end - time_start;
 }
 
 void Environment::printMap(){
   uint16_t scale = min((uint16_t)100, testground_size_);
-  cout << "Der (skalierte) Testbereich in Tick " << tick_ << ":" << endl;
+  cout << "Der (skalierte) Testbereich in Tick " << tick_ << ":\n";
   vector<vector<int>> map_d(scale, vector<int>(scale));
   for (size_t i = 0; i < dots_.size(); ++i) {
     ++map_d[(dots_[i].getPosition().first) * scale / testground_size_][(dots_[i].getPosition().second) * scale / testground_size_];
@@ -154,9 +176,9 @@ void Environment::printMap(){
         cout << " ";
       }
     }
-    cout << endl;
+    cout << "\n";
   }
-  cout << "Legende: ' ' Nichts, '.' Dot, 'x' Essen, '%' Dot und Essen\nBei mehreren Objekten auf demselben Punkt wird nur eins angezeigt\nDie Ausgabe ist skaliert auf 100x100" << endl;
+  cout << "Legende: ' ' Nichts, '.' Dot, 'x' Essen, '%' Dot und Essen\nBei mehreren Objekten auf demselben Punkt wird nur eins angezeigt\nDie Ausgabe ist skaliert auf 100x100\n";
 }
 
 void Environment::printTestground(){
@@ -203,19 +225,20 @@ void Environment::printProperties(){
       sum_speed += dot_speed;
       sum_energy += dot_energy;
     }
-    cout << "\nMin-/Max-/Avgwerte von " << dots_.size() << " Dots in Tick " << tick_ << ": " << endl;
-    cout << "SIGHT: " << min_sight << "/" << max_sight << "/" <<(float)sum_sight/dots_.size() << endl;
-    cout << "SPEED: " << min_speed << "/" << max_speed << "/" <<(float)sum_speed/dots_.size() << endl;
-    cout << "ENERGY: " << min_energy << "/" << max_energy << "/" <<(float)sum_energy/dots_.size() << endl;
-    cout << "Im aktuellen Tick sind " << food_.size() << " Futterstuecke auf dem Feld" << endl;
+    cout << "\nMin-/Max-/Avgwerte von " << dots_.size() << " Dots in Tick " << tick_ << ": \n";
+    cout << "SIGHT: " << min_sight << "/" << max_sight << "/" <<(float)sum_sight/dots_.size();
+    cout << "\nSPEED: " << min_speed << "/" << max_speed << "/" <<(float)sum_speed/dots_.size();
+    cout << "\nENERGY: " << min_energy << "/" << max_energy << "/" <<(float)sum_energy/dots_.size();
+    cout << "\nIm aktuellen Tick sind " << food_.size() << " Futterstuecke auf dem Feld\n";
     if(debug || debug_env){
       int f = food_.size();
       int dots = dots_.size();
       int sum = 2 * f * log(f) + 2 * dots * (log(f) + log(f / 2) + pow(f * (sum_sight / dots) / testground_size_,2) + 2 * f * pow((sum_sight / dots) / testground_size_, 2));
       int sum2 = f * log(f) + dots * (log(f) + log(f / 2) + 2 * f * (sum_sight / dots) / testground_size_);
-      cout << "Laufzeitanalyse Futtersuche (geschätzte Werte):\nNaiver Ansatz: " << f * dots << "\nSchnitt aus Intervallen aus sortierten Listen: " << sum << "\nIntervall einer sortierten Liste:  " << sum2 << endl;
+      cout << "Laufzeitanalyse Futtersuche (geschätzte Werte):\nNaiver Ansatz: " << f * dots << "\nSchnitt aus Intervallen aus sortierten Listen: " << sum << "\nIntervall einer sortierten Liste:  " << sum2 << "\n";
     }
   } else {
-    cout << "Im Tick " << tick_ << " sind keine Dots mehr am Leben." << endl;
+    cout << "Im Tick " << tick_ << " sind keine Dots mehr am Leben.\n";
   }
+  return dots_.size();
 }

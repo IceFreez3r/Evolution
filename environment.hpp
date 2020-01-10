@@ -18,7 +18,7 @@ public:
   void feeding(const int min_amount, const int max_amount);
   void feeding(const int food_count);
   // "Tells" a Dot if it can see food
-  void searchFood(Dot &d);
+  void searchFood();
   // Prints the Positions of dots and food scaled to a 100x100 matrix
   void printMap();
   void printTestground();
