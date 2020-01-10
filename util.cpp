@@ -5,7 +5,7 @@
 
 using namespace std;
 
-extern bool debug;
+extern bool debug; // "extern" tells the compiler that debug is already declared somewhere else (environment.cpp)
 bool debug_util = false;
 
 uint16_t distance(const pair<uint16_t, uint16_t> pos, const pair<uint16_t, uint16_t> pos2, const uint16_t testground_size){
