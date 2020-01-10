@@ -87,13 +87,20 @@ void Environment::contamination(const int amount){
   }
 }
 
-void Environment::feeding(const int min_amount, const int max_amount /* = 0 */){
-  int food_count;
+void Environment::feeding(const int min_amount, const int max_amount){
   if (min_amount >= max_amount) {
-    food_count = min_amount;
-  } else {
-    food_count = rand() % (max_amount - min_amount) + min_amount;
+    feeding(min_amount);
+    return;
   }
+  int food_count = rand() % (max_amount - min_amount) + min_amount;
+  for (int i = 0; i < food_count; ++i) {
+    uint16_t x = rand() % testground_size_;
+    uint16_t y = rand() % testground_size_;
+    food_.push_back(make_pair(x,y));
+  }
+}
+
+void Environment::feeding(const int food_count){
   for (int i = 0; i < food_count; ++i) {
     uint16_t x = rand() % testground_size_;
     uint16_t y = rand() % testground_size_;
@@ -137,6 +144,7 @@ void Environment::searchFood(){
       dots_[i].newFoodSource(food_[min_it - food_.begin()]);
     }
   }
+
 }
 
 void Environment::printMap(){
@@ -175,22 +183,35 @@ void Environment::printTestground(){
 
 void Environment::printProperties(){
   if(dots_.size() != 0){
+    std::vector<uint16_t> speed_count_vec;
     uint16_t min_speed = ~0;
     uint16_t max_speed = 0;
-    uint32_t sum_speed = 0;
 
+    std::vector<uint16_t> sight_count_vec;
     uint16_t min_sight = ~0;
     uint16_t max_sight = 0;
-    uint32_t sum_sight = 0;
 
     int min_energy = ~(1 << 31);
     int max_energy = 0;
     int64_t sum_energy = 0;
 
     for (size_t i = 0; i < dots_.size(); ++i) {
+      // Get() properties once and save them
       uint16_t dot_speed = dots_[i].getSpeed();
       uint16_t dot_sight = dots_[i].getSight();
       int dot_energy = dots_[i].getEnergy();
+
+      // Count occurences of specific values
+      if(dot_speed > speed_count_vec.size()){
+        speed_count_vec.resize(dot_speed);
+      }
+      ++speed_count_vec[dot_speed - 1];
+      if(dot_sight > sight_count_vec.size()){
+        sight_count_vec.resize(dot_sight);
+      }
+      ++sight_count_vec[dot_sight - 1];
+
+      // Compare to current minimum
       if(dot_speed < min_speed){
         min_speed = dot_speed;
       }
@@ -200,6 +221,8 @@ void Environment::printProperties(){
       if(dot_energy < min_energy){
         min_energy = dot_energy;
       }
+
+      // Compare to current maximum
       if(dot_speed > max_speed){
         max_speed = dot_speed;
       }
@@ -209,14 +232,41 @@ void Environment::printProperties(){
       if(dot_energy > max_energy){
         max_energy = dot_energy;
       }
-      sum_sight += dot_sight;
-      sum_speed += dot_speed;
+
+      // Add to sum, needed for average
       sum_energy += dot_energy;
+    }
+    uint32_t sum_sight = 0;
+    for (size_t i = 1; i <= sight_count_vec.size(); ++i) {
+      sum_sight += sight_count_vec[i-1]*(i);
+    }
+    uint32_t sum_speed = 0;
+    for (size_t i = 1; i <= speed_count_vec.size(); ++i) {
+      sum_speed += speed_count_vec[i-1]*(i);
     }
     cout << "\nMin-/Max-/Avgwerte von " << dots_.size() << " Dots in Tick " << tick_ << ": \n";
     cout << "SIGHT: " << min_sight << "/" << max_sight << "/" <<(float)sum_sight/dots_.size();
     cout << "\nSPEED: " << min_speed << "/" << max_speed << "/" <<(float)sum_speed/dots_.size();
     cout << "\nENERGY: " << min_energy << "/" << max_energy << "/" <<(float)sum_energy/dots_.size();
+
+    // Output of count-vectors
+    cout << "\nGenaue Sightwerte:";
+    std::string line1 = "\nWert:   |";
+    std::string line2 = "\nAnzahl: |";
+    for (size_t i = min_sight; i <= sight_count_vec.size(); ++i) {
+      line1 += niceNumberPrint(i, 3) + "|";
+      line2 += niceNumberPrint(sight_count_vec[i-1], 3) + "|";
+    }
+    cout << line1 << line2;
+    cout << "\nGenaue Speedwerte:";
+    line1 = "\nWert:   |";
+    line2 = "\nAnzahl: |";
+    for (size_t i = min_speed; i <= speed_count_vec.size(); ++i) {
+      line1 += niceNumberPrint(i, 3) + "|";
+      line2 += niceNumberPrint(speed_count_vec[i-1], 3) + "|";
+    }
+    cout << line1 << line2;
+
     cout << "\nIm aktuellen Tick sind " << food_.size() << " Futterstuecke auf dem Feld\n";
     if(debug || debug_env){
       int f = food_.size();
@@ -228,5 +278,4 @@ void Environment::printProperties(){
   } else {
     cout << "Im Tick " << tick_ << " sind keine Dots mehr am Leben.\n";
   }
-  return dots_.size();
 }

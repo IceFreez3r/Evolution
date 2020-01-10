@@ -1,5 +1,6 @@
 #include <utility>
 #include <cstdint>
+#include <string>
 
 /* All functions take into account that the shortest way may go over the side of the Testground:
 ______________
@@ -23,3 +24,5 @@ std::pair<uint16_t, uint16_t> move(const std::pair<uint16_t, uint16_t> pos, int1
 // Returns -1 for x < 0, 0 for x = 0, 1 for x > 0
 int signum(float val);
 // template <typename T> int signum(T val);
+
+std::string niceNumberPrint(const uint16_t number, uint8_t length);
