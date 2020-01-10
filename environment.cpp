@@ -221,7 +221,7 @@ void Environment::printProperties(){
       sum_speed += dot_speed;
       sum_energy += dot_energy;
     }
-    cout << "\nMin-/Max-/Avgwerte von " << dots_.size() << " Dots in Tick " << tick_ << ": \n;
+    cout << "\nMin-/Max-/Avgwerte von " << dots_.size() << " Dots in Tick " << tick_ << ": \n";
     cout << "SIGHT: " << min_sight << "/" << max_sight << "/" <<(float)sum_sight/dots_.size();
     cout << "\nSPEED: " << min_speed << "/" << max_speed << "/" <<(float)sum_speed/dots_.size();
     cout << "\nENERGY: " << min_energy << "/" << max_energy << "/" <<(float)sum_energy/dots_.size();
