@@ -87,20 +87,13 @@ void Environment::contamination(const int amount){
   }
 }
 
-void Environment::feeding(const int min_amount, const int max_amount){
+void Environment::feeding(const int min_amount, const int max_amount /* = 0 */){
+  int food_count;
   if (min_amount >= max_amount) {
-    feeding(min_amount);
-    return;
+    food_count = min_amount;
+  } else {
+    food_count = rand() % (max_amount - min_amount) + min_amount;
   }
-  int food_count = rand() % (max_amount - min_amount) + min_amount;
-  for (int i = 0; i < food_count; ++i) {
-    uint16_t x = rand() % testground_size_;
-    uint16_t y = rand() % testground_size_;
-    food_.push_back(make_pair(x,y));
-  }
-}
-
-void Environment::feeding(const int food_count){
   for (int i = 0; i < food_count; ++i) {
     uint16_t x = rand() % testground_size_;
     uint16_t y = rand() % testground_size_;
