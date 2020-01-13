@@ -1,0 +1,40 @@
+#include <vector>	
+#include <cstdint>	
+
+#include "dot.hpp"	
+
+class Environment {	
+public:	
+  // Standard Constructor	
+  // generates default environment	
+  Environment();	
+  // Custom Constructor	
+  // generates environment with given values, with generic start Dots	
+  Environment(const std::uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count);	
+  // generates environment with given values and start Dots	
+  Environment(const std::uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count, const Dot start_dot);	
+   // Triggers tick() function of every Dot and runs feeding(...), if amount is given the function is repeated multiple times	
+  void tick(const int amount = 1);	
+  // Places new Dots on the Testground with standard properties	
+  void contamination(const int amount);	
+  // Places new Foodsources at random locations on the Testground	
+  // If only min_amount is given or min_amount is greater than max_amount,	
+  // exactly min_amount Foodsources are generated	
+  // If min and max_amount are given, the function generates a random number	
+  // between them and places that many Foodsources	
+  void feeding(const int min_amount, const int max_amount = 0);	
+  // "Tells" a Dot if it can see food	
+  void searchFood();	
+  // Prints the Positions of Dots and food scaled to a 100x100 matrix	
+  void printMap();	
+  void printTestground();	
+  void printProperties();	
+private:	
+  const std::uint16_t testground_size_; // Size of the Testground	
+  std::vector<std::pair<std::uint16_t, std::uint16_t>> food_; //Positions of Food	
+  const int min_food_per_tick_;	
+  const int max_food_per_tick_;	
+  Dot start_dot_;	
+  std::vector<Dot> dots_; //Vector of all Dots	
+  uint32_t tick_;	
+};
