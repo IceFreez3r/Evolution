@@ -137,7 +137,6 @@ void Environment::searchFood(){
       dots_[i].newFoodSource(food_[min_it - food_.begin()]);
     }
   }
-
 }
 
 void Environment::printMap(){
