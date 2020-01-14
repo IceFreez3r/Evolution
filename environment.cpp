@@ -121,14 +121,35 @@ void Environment::searchFood(){
     // Calculate exact distance for food in interval
     auto min_it = end;
     uint16_t min_distance = ~0;
-    for (auto j = start; j < end; ++j) {
-      uint16_t dist = distance(dots_[i].getPosition(), food_[j - food_.begin()], testground_size_);
-      if(dist < min_distance){
-        min_it = j;
-        min_distance = dist;
+    if(end <= start){
+      // Dots close to the edge can see food sources on the other side of
+      // the map. This creates some kinda weird interval:
+      // |-.--->         <--|, so we need 2 for-loops
+      for (auto j = food_.begin(); j < end; ++j) {
+        uint16_t dist = distance(dots_[i].getPosition(), food_[j - food_.begin()], testground_size_);
+        if(dist < min_distance){
+          min_it = j;
+          min_distance = dist;
+        }
+      }
+      for (auto j = start; j < food_.end(); ++j) {
+        uint16_t dist = distance(dots_[i].getPosition(), food_[j - food_.begin()], testground_size_);
+        if(dist < min_distance){
+          min_it = j;
+          min_distance = dist;
+        }
+      }
+    } else {
+      // normal case: |  <---.--->       |
+      for (auto j = start; j < end; ++j) {
+        uint16_t dist = distance(dots_[i].getPosition(), food_[j - food_.begin()], testground_size_);
+        if(dist < min_distance){
+          min_it = j;
+          min_distance = dist;
+        }
       }
     }
-
+    // Tell the Dot about the food source
     if(min_it != end && min_distance == 0){
       dots_[i].eat(1000);
       food_.erase(min_it);
