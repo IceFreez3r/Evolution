@@ -11,6 +11,7 @@ public:
   // Custom Constructor
   // generates environment with given values, with generic start Dots
   Environment(const std::uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count);
+
   // generates environment with given values and start Dots
   Environment(const std::uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count, const Dot start_dot);
    // Triggers tick() function of every Dot and runs feeding(...), if amount is given the function is repeated multiple times

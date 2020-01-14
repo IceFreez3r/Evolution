@@ -9,7 +9,6 @@ int main(int argc, char const *argv[]) {
     e.tick(10);
     e.printProperties();
     // e.printTestground();
-
   }
   return 0;
 }

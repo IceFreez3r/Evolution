@@ -54,6 +54,10 @@ To then run the simulation, use tick():
 e.tick(); // One tick
 e.tick(amount); // As many ticks at once as you like
 ```
+To print a map with positions of Dots and Foordsources, use printMap():
+```C++
+e.printMap();
+```
 To print the Testground, use printTestground():  
 ```C++
 e.printTestground();

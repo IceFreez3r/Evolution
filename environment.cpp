@@ -137,6 +137,7 @@ void Environment::searchFood(){
       dots_[i].newFoodSource(food_[min_it - food_.begin()]);
     }
   }
+
 }
 
 void Environment::printMap(){
@@ -228,5 +229,4 @@ void Environment::printProperties(){
   } else {
     cout << "Im Tick " << tick_ << " sind keine Dots mehr am Leben.\n";
   }
-  return dots_.size();
 }
