@@ -109,35 +109,40 @@ void Environment::searchFood(){
     }
   }
   for (size_t i = 0; i < dots_.size(); ++i) {
-    // Find interval for x values of food_
+    // Calculate Min. und Max. X-values for each Dot
     uint16_t min_x = (dots_[i].getPosition().first - dots_[i].getSight() + testground_size_) % testground_size_;
     uint16_t max_x = (dots_[i].getPosition().first + dots_[i].getSight() + testground_size_) % testground_size_;
-    auto start = find_if(food_.begin(), food_.end(), [&min_x](const pair<uint16_t, uint16_t>& food) {
+
+    // Find interval for x values of food_
+    auto interval_start = find_if(food_.begin(), food_.end(), [&min_x](const pair<uint16_t, uint16_t>& food) {
       return food.first >= min_x;
     });
-    auto end = find_if(food_.begin(), food_.end(), [&max_x](const pair<uint16_t, uint16_t>& food) {
+    auto interval_end = find_if(food_.begin(), food_.end(), [&max_x](const pair<uint16_t, uint16_t>& food) {
       return food.first > max_x;
     });
-    // Calculate exact distance for food in interval
-    auto min_it = end;
-    uint16_t min_distance = ~0;
-    for (auto j = start; j < end; ++j) {
-      uint16_t dist = distance(dots_[i].getPosition(), food_[j - food_.begin()], testground_size_);
-      if(dist < min_distance){
-        min_it = j;
-        min_distance = dist;
+
+    uint16_t min_distance;
+    do {
+      auto min_it = interval_end;
+      min_distance = ~0;
+      // Calculate exact distance for food in interval
+      
+      for (auto j = interval_start; j < interval_end; ++j) {
+        uint16_t dist = distance(dots_[i].getPosition(), food_[j - food_.begin()], testground_size_);
+        if(dist < min_distance){
+          min_it = j;
+          min_distance = dist;
+        }
       }
-    }
-
-    if(min_it != end && min_distance == 0){
-      dots_[i].eat(1000);
-      food_.erase(min_it);
-      searchFood();
-    } else if(min_distance < dots_[i].getSight()){
-      dots_[i].newFoodSource(food_[min_it - food_.begin()]);
-    }
+      if(min_distance == 0){
+        dots_[i].eat(1000);
+        food_.erase(min_it);
+        --interval_end;
+      } else if(min_distance < dots_[i].getSight()){
+        dots_[i].newFoodSource(food_[min_it - food_.begin()]);
+      }
+    } while(min_distance == 0);
   }
-
 }
 
 void Environment::printMap(){
