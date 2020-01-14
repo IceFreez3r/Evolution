@@ -59,3 +59,30 @@ int signum(float val) {
 // template <typename T> int signum(T val) {
 //     return (T(0) < val) - (val < T(0));
 // }
+
+std::string niceNumberPrint(const uint16_t number, uint8_t length){
+  uint8_t front_spaces = 0, back_spaces = 0;
+  std::string number_string = to_string(number);
+  while(front_spaces + back_spaces + number_string.length() < length){
+    if(front_spaces == back_spaces){
+      ++front_spaces;
+    } else {
+      ++back_spaces;
+    }
+  }
+  std::string out_string = "";
+  for (uint8_t i = 0; i < front_spaces; ++i) {
+    out_string += " ";
+  }
+  out_string += number_string;
+  for (uint8_t i = 0; i < back_spaces; ++i) {
+    out_string += " ";
+  }
+  return out_string;
+}
+//   2    3      4       5    ...
+// | 1| | 1 | |  1 |  |  1  | ...
+// |11| | 11| | 11 |  |  11 | ...
+//      |111| | 111|  | 111 | ...
+//            |1111|  | 1111| ...
+//                    |11111| ...
