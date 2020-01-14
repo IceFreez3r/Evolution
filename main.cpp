@@ -1,4 +1,3 @@
-
 #include "environment.hpp"
 
 using namespace std;
