@@ -120,20 +120,40 @@ void Environment::searchFood(){
     auto interval_end = find_if(food_.begin(), food_.end(), [&max_x](const pair<uint16_t, uint16_t>& food) {
       return food.first > max_x;
     });
-
     uint16_t min_distance;
     do {
+      // Calculate exact distance for food in interval
       auto min_it = interval_end;
       min_distance = ~0;
-      // Calculate exact distance for food in interval
-
-      for (auto j = interval_start; j < interval_end; ++j) {
-        uint16_t dist = distance(dots_[i].getPosition(), food_[j - food_.begin()], testground_size_);
-        if(dist < min_distance){
-          min_it = j;
-          min_distance = dist;
+      if(interval_end <= interval_start){
+        // Dots close to the edge can see food sources on the other side of
+        // the map. This creates some kinda weird interval:
+        // |-.--->         <--|, so we need 2 for-loops
+        for (auto j = food_.begin(); j < interval_end; ++j) {
+          uint16_t dist = distance(dots_[i].getPosition(), food_[j - food_.begin()], testground_size_);
+          if(dist < min_distance){
+            min_it = j;
+            min_distance = dist;
+          }
+        }
+        for (auto j = interval_start; j < food_.end(); ++j) {
+          uint16_t dist = distance(dots_[i].getPosition(), food_[j - food_.begin()], testground_size_);
+          if(dist < min_distance){
+            min_it = j;
+            min_distance = dist;
+          }
+        }
+      } else {
+        // normal case: |  <---.--->       |
+        for (auto j = interval_start; j < interval_end; ++j) {
+          uint16_t dist = distance(dots_[i].getPosition(), food_[j - food_.begin()], testground_size_);
+          if(dist < min_distance){
+            min_it = j;
+            min_distance = dist;
+          }
         }
       }
+      // Tell the Dot about the Food
       if(min_distance == 0){
         dots_[i].eat(1000);
         food_.erase(min_it);
