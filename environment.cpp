@@ -126,7 +126,7 @@ void Environment::searchFood(){
       auto min_it = interval_end;
       min_distance = ~0;
       // Calculate exact distance for food in interval
-      
+
       for (auto j = interval_start; j < interval_end; ++j) {
         uint16_t dist = distance(dots_[i].getPosition(), food_[j - food_.begin()], testground_size_);
         if(dist < min_distance){
@@ -144,6 +144,7 @@ void Environment::searchFood(){
     } while(min_distance == 0);
   }
 }
+
 void Environment::printMap(){
   // Scale the the Environment down to 100x100 if testground_size_ is bigger than 100
   uint16_t scale = min((uint16_t)100, testground_size_);
