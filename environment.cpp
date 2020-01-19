@@ -277,9 +277,11 @@ void Environment::printProperties(){
     std::string line2 = "\nAnzahl: |";
     for (size_t i = min_sight; i <= sight_count_vec.size(); ++i) {
       if (sight_count_vec[i-1] != 0){
-        line1 += niceNumberPrint(i, 3) + "|";
-        line2 += niceNumberPrint(sight_count_vec[i-1], 3) + "|";
+        line1 += niceNumberPrint(i, 3);
+        line2 += niceNumberPrint(sight_count_vec[i-1], 3);
       }
+      line1 += "|";
+      line2 += "|";
     }
     cout << line1 << line2;
     cout << "\nGenaue Speedwerte:";
@@ -287,9 +289,11 @@ void Environment::printProperties(){
     line2 = "\nAnzahl: |";
     for (size_t i = min_speed; i <= speed_count_vec.size(); ++i) {
       if (speed_count_vec[i-1] != 0){
-        line1 += niceNumberPrint(i, 3) + "|";
-        line2 += niceNumberPrint(speed_count_vec[i-1], 3) + "|";
+        line1 += niceNumberPrint(i, 3);
+        line2 += niceNumberPrint(speed_count_vec[i-1], 3);
       }
+      line1 += "|";
+      line2 += "|";
     }
     cout << line1 << line2;
 
