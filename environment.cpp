@@ -153,6 +153,7 @@ void Environment::searchFood(){
           }
         }
       }
+      // Tell the Dot about the Food
       if(min_distance == 0){
         dots_[i].eat(1000);
         food_.erase(min_it);
