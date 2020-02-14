@@ -81,9 +81,10 @@ void Environment::tick(const int amount /* = 1 */){
   }
 }
 
+// Places new Dots at random locations on the map.
 void Environment::contamination(const int amount){
   for (int i = 0; i < amount; ++i) {
-    dots_.push_back(Dot(start_dot_));
+    dots_.push_back(Dot(start_dot_, false)); // "false" prevents copying of postion and direction
   }
 }
 
