@@ -42,18 +42,25 @@ Dot::Dot(const uint16_t testground_size, const int energy, const uint16_t speed,
   food_in_sight_pos_ = make_pair(0,0);
 }
 
-Dot::Dot(const Dot &d):
+Dot::Dot(const Dot &d, bool exact_copy /*= true*/):
   speed_(d.speed_),
   sight_(d.sight_),
-  size_(d.size_)
+  size_(d.size_),
+  energy_(d.energy_),
+  reproduction_cooldown_(d.reproduction_cooldown_),
+  testground_size_(d.testground_size_),
+  food_in_sight_(d.food_in_sight_),
+  food_in_sight_pos_(d.food_in_sight_pos_)
 {
-  energy_ = d.energy_;
-  position_ = d.position_;
-  reproduction_cooldown_ = d.reproduction_cooldown_;
-  direction_ = d.direction_;
-  testground_size_ = d.testground_size_;
-  food_in_sight_ = d.food_in_sight_;
-  food_in_sight_pos_ = d.food_in_sight_pos_;
+	if(exact_copy){
+  	position_ = d.position_;
+  	direction_ = d.direction_;
+	} else {
+		uint16_t x = rand() % testground_size_;
+		uint16_t y = rand() % testground_size_;
+		position_ = make_pair(x, y);
+		direction_ = rand() % 360;
+	}
 }
 
 void Dot::tick(){

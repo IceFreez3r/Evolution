@@ -8,7 +8,7 @@ public:
   // Replication constructor
   Dot(const uint16_t testground_size, const int energy, const uint16_t speed, const uint16_t sight, const uint16_t size, const std::pair<uint16_t, uint16_t> pos);
   // Copy constructor
-  Dot(const Dot &d);
+  Dot(const Dot &d, bool exact_copy = true);
   // ~Dot(); // Neccessary?
   // If the dot targets a food source, it moves toward the food
   // Otherwise the dot changes its direction a bit and moves in that direction
@@ -42,10 +42,10 @@ private:
 
   // Dynamic properties
   int energy_; // energy the dot, the dot dies when it reaches 0
-  std::pair<uint16_t, uint16_t> position_; // position on the Testground
   int reproduction_cooldown_; // time until the dot can replicate again
-  int16_t direction_; // direction of movement, (0 right, 90 up, 180 left, -90 down)
   uint16_t testground_size_;
   bool food_in_sight_; // True, if a food source is in sight
   std::pair<uint16_t, uint16_t> food_in_sight_pos_; // position of the food source in sight
+  std::pair<uint16_t, uint16_t> position_; // position on the Testground
+  int16_t direction_; // direction of movement, (0 right, 90 up, 180 left, -90 down)
 };
