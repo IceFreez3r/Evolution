@@ -18,12 +18,14 @@ public:
   void tick(const int amount = 1);
   // Places new Dots on the Testground with standard properties
   void contamination(const int amount);
+  // Changes the amount of food generated in each tick
+  void changeFoodPerTick(const int min_amount, const int max_amount);
   // Places new Foodsources at random locations on the Testground
   // If only min_amount is given or min_amount is greater than max_amount,
   // exactly min_amount Foodsources are generated
   // If min and max_amount are given, the function generates a random number
   // between them and places that many Foodsources
-  void feeding(const int min_amount, const int max_amount = 0);
+  void feeding();
   // "Tells" a Dot if it can see food
   void searchFood();
   // Prints the Positions of Dots and food scaled to a 100x100 matrix
@@ -33,8 +35,8 @@ public:
 private:
   const std::uint16_t testground_size_; // Size of the Testground
   std::vector<std::pair<std::uint16_t, std::uint16_t>> food_; //Positions of Food
-  const int min_food_per_tick_;
-  const int max_food_per_tick_;
+  int min_food_per_tick_;
+  int max_food_per_tick_;
   Dot start_dot_;
   std::vector<Dot> dots_; //Vector of all Dots
   uint32_t tick_;

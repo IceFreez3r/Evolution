@@ -18,47 +18,45 @@ Environment::Environment():
   food_(),
   min_food_per_tick_(0),
   max_food_per_tick_(200),
-  dots_()
+  start_dot_(Dot(testground_size_)),
+  dots_(),
+  tick_(0)
 {
   srand(time(NULL));
-  tick_ = 0;
-  start_dot_ = Dot(testground_size_);
   contamination(1000);
 }
 
 Environment::Environment(const uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count):
   testground_size_(min(testground_size, (uint16_t)65535)),
   food_(),
-  min_food_per_tick_(min_food_count),
-  max_food_per_tick_(max_food_count),
-  dots_()
+  start_dot_(Dot(testground_size_)),
+  dots_(),
+  tick_(0)
 {
   srand(time(NULL));
-  tick_ = 0;
-  start_dot_ = Dot(testground_size_);
+  changeFoodPerTick(min_food_count, max_food_count);
   contamination(dot_count);
 }
 
 Environment::Environment(const uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count, const Dot start_dot):
   testground_size_(min(testground_size, (uint16_t)65535)),
   food_(),
-  min_food_per_tick_(min_food_count),
-  max_food_per_tick_(max_food_count),
-  dots_()
+  start_dot_(start_dot),
+  dots_(),
+  tick_(0)
 {
   srand(time(NULL));
-  tick_ = 0;
-  start_dot_ = start_dot;
   if(testground_size_ != start_dot_.getTestgroundSize()){
     start_dot_.setTestgroundSize(testground_size_);
   }
+  changeFoodPerTick(min_food_count, max_food_count);
   contamination(dot_count);
 }
 
 void Environment::tick(const int amount /* = 1 */){
   for (int i = 0; i < amount; ++i) {
     // Generate new Food
-    feeding(min_food_per_tick_, max_food_per_tick_);
+    feeding();
     // Trigger Tick of every Dot and let Dots with enough energy replicate
     searchFood();
     for (size_t i = 0; i < dots_.size(); ++i) {
@@ -88,13 +86,18 @@ void Environment::contamination(const int amount){
   }
 }
 
-void Environment::feeding(const int min_amount, const int max_amount /* = 0 */){
-  int food_count;
-  if (min_amount >= max_amount) {
-    food_count = min_amount;
-  } else {
-    food_count = rand() % (max_amount - min_amount) + min_amount;
-  }
+void Environment::changeFoodPerTick(const int min_amount, const int max_amount){
+	if(min_amount > max_amount){
+		min_food_per_tick_ = min_amount;
+		max_food_per_tick_ = min_amount;
+	} else {
+		min_food_per_tick_ = min_amount;
+		max_food_per_tick_ = max_amount;
+	}
+}
+
+void Environment::feeding(){
+  int food_count = rand() % (max_food_per_tick_ - min_food_per_tick_) + min_food_per_tick_;
   for (int i = 0; i < food_count; ++i) {
     uint16_t x = rand() % testground_size_;
     uint16_t y = rand() % testground_size_;
