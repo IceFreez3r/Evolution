@@ -20,7 +20,7 @@ Environment::Environment():
   max_food_per_tick_(200),
   start_dot_(Dot(testground_size_)),
   dots_(),
-	tick_(0)
+  tick_(0)
 {
   srand(time(NULL));
   contamination(1000);
