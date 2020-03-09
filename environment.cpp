@@ -15,11 +15,11 @@ bool debug_env = false;
 
 Environment::Environment():
   testground_size_(65535),
-  food_(),
+  food_vec_(),
   min_food_per_tick_(0),
   max_food_per_tick_(200),
   start_dot_(Dot(testground_size_)),
-  dots_(),
+  dots_vec_(),
   tick_(0)
 {
   srand(time(NULL));
@@ -28,9 +28,9 @@ Environment::Environment():
 
 Environment::Environment(const uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count):
   testground_size_(min(testground_size, (uint16_t)65535)),
-  food_(),
+  food_vec_(),
   start_dot_(Dot(testground_size_)),
-  dots_(),
+  dots_vec_(),
   tick_(0)
 {
   srand(time(NULL));
@@ -40,9 +40,9 @@ Environment::Environment(const uint16_t testground_size, const int dot_count, co
 
 Environment::Environment(const uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count, const Dot start_dot):
   testground_size_(min(testground_size, (uint16_t)65535)),
-  food_(),
+  food_vec_(),
   start_dot_(start_dot),
-  dots_(),
+  dots_vec_(),
   tick_(0)
 {
   srand(time(NULL));
@@ -59,22 +59,22 @@ void Environment::tick(const int amount /* = 1 */){
     feeding();
     // Trigger Tick of every Dot and let Dots with enough energy replicate
     searchFood();
-    for (size_t i = 0; i < dots_.size(); ++i) {
-      dots_[i].tick();
-      if(dots_[i].getReproductionCooldown() <= 0 && dots_[i].getEnergy() >= 5000){
-        dots_.push_back(dots_[i].replicate());
+    for (size_t i = 0; i < dots_vec_.size(); ++i) {
+      dots_vec_[i].tick();
+      if(dots_vec_[i].getReproductionCooldown() <= 0 && dots_vec_[i].getEnergy() >= 5000){
+        dots_vec_.push_back(dots_vec_[i].replicate(0.2)); // the mutationrate is constant at the moment, change here if wanted
       }
     }
     // Delete Dot with 0 energy or less
-    dots_.erase(remove_if(dots_.begin(), dots_.end(), [](Dot &d){
+    dots_vec_.erase(remove_if(dots_vec_.begin(), dots_vec_.end(), [](Dot &d){
       return d.getEnergy() <= 0;
-    }), dots_.end());
+    }), dots_vec_.end());
     ++tick_;
 
     if(debug || debug_env){
       cout << "Tick: " << tick_;
-      cout << "\nLebende Dots: " << dots_.size();
-      cout << "\nMenge Futter auf dem Testfeld: " << food_.size() << "\n";
+      cout << "\nLebende Dots: " << dots_vec_.size();
+      cout << "\nMenge Futter auf dem Testfeld: " << food_vec_.size() << "\n";
     }
   }
 }
@@ -82,7 +82,7 @@ void Environment::tick(const int amount /* = 1 */){
 // Places new Dots at random locations on the map.
 void Environment::contamination(const int amount){
   for (int i = 0; i < amount; ++i) {
-    dots_.push_back(Dot(start_dot_, false)); // "false" prevents copying of postion and direction
+    dots_vec_.push_back(Dot(start_dot_, false)); // "false" prevents copying of postion and direction
   }
 }
 
@@ -97,31 +97,36 @@ void Environment::changeFoodPerTick(const int min_amount, const int max_amount){
 }
 
 void Environment::feeding(){
-  int food_count = rand() % (max_food_per_tick_ - min_food_per_tick_) + min_food_per_tick_;
+  int food_count;
+  if (max_food_per_tick_ != min_food_per_tick_){
+    food_count = rand() % (max_food_per_tick_ - min_food_per_tick_) + min_food_per_tick_;
+  } else {
+    food_count = min_food_per_tick_;
+  }
   for (int i = 0; i < food_count; ++i) {
     uint16_t x = rand() % testground_size_;
     uint16_t y = rand() % testground_size_;
-    food_.push_back(make_pair(x,y));
+    food_vec_.push_back(make_pair(x,y));
   }
 }
 
 void Environment::searchFood(){
-  sort(food_.begin(), food_.end());
+  sort(food_vec_.begin(), food_vec_.end());
   if (debug || debug_env) {
-    for (size_t i = 0; i < food_.size(); ++i) {
-      cout << "(" << food_[i].first << "," << food_[i].first << ")\n";
+    for (size_t i = 0; i < food_vec_.size(); ++i) {
+      cout << "(" << food_vec_[i].first << "," << food_vec_[i].first << ")\n";
     }
   }
-  for (size_t i = 0; i < dots_.size(); ++i) {
+  for (size_t i = 0; i < dots_vec_.size(); ++i) {
     // Calculate Min. und Max. X-values for each Dot
-    uint16_t min_x = (dots_[i].getPosition().first - dots_[i].getSight() + testground_size_) % testground_size_;
-    uint16_t max_x = (dots_[i].getPosition().first + dots_[i].getSight() + testground_size_) % testground_size_;
+    uint16_t min_x = (dots_vec_[i].getPosition().first - dots_vec_[i].getSight() + testground_size_) % testground_size_;
+    uint16_t max_x = (dots_vec_[i].getPosition().first + dots_vec_[i].getSight() + testground_size_) % testground_size_;
 
-    // Find interval for x values of food_
-    auto interval_start = find_if(food_.begin(), food_.end(), [&min_x](const pair<uint16_t, uint16_t>& food) {
+    // Find interval for x values of food_vec_
+    auto interval_start = find_if(food_vec_.begin(), food_vec_.end(), [&min_x](const pair<uint16_t, uint16_t>& food) {
       return food.first >= min_x;
     });
-    auto interval_end = find_if(food_.begin(), food_.end(), [&max_x](const pair<uint16_t, uint16_t>& food) {
+    auto interval_end = find_if(food_vec_.begin(), food_vec_.end(), [&max_x](const pair<uint16_t, uint16_t>& food) {
       return food.first > max_x;
     });
     uint16_t min_distance;
@@ -133,15 +138,15 @@ void Environment::searchFood(){
         // Dots close to the edge can see food sources on the other side of
         // the map. This creates some kinda weird interval:
         // |-.--->         <--|, so we need 2 for-loops
-        for (auto j = food_.begin(); j < interval_end; ++j) {
-          uint16_t dist = distance(dots_[i].getPosition(), food_[j - food_.begin()], testground_size_);
+        for (auto j = food_vec_.begin(); j < interval_end; ++j) {
+          uint16_t dist = distance(dots_vec_[i].getPosition(), food_vec_[j - food_vec_.begin()], testground_size_);
           if(dist < min_distance){
             min_it = j;
             min_distance = dist;
           }
         }
-        for (auto j = interval_start; j < food_.end(); ++j) {
-          uint16_t dist = distance(dots_[i].getPosition(), food_[j - food_.begin()], testground_size_);
+        for (auto j = interval_start; j < food_vec_.end(); ++j) {
+          uint16_t dist = distance(dots_vec_[i].getPosition(), food_vec_[j - food_vec_.begin()], testground_size_);
           if(dist < min_distance){
             min_it = j;
             min_distance = dist;
@@ -150,7 +155,7 @@ void Environment::searchFood(){
       } else {
         // normal case: |  <---.--->       |
         for (auto j = interval_start; j < interval_end; ++j) {
-          uint16_t dist = distance(dots_[i].getPosition(), food_[j - food_.begin()], testground_size_);
+          uint16_t dist = distance(dots_vec_[i].getPosition(), food_vec_[j - food_vec_.begin()], testground_size_);
           if(dist < min_distance){
             min_it = j;
             min_distance = dist;
@@ -159,11 +164,11 @@ void Environment::searchFood(){
       }
       // Tell the Dot about the Food
       if(min_distance == 0){
-        dots_[i].eat(1000);
-        food_.erase(min_it);
+        dots_vec_[i].eat(1000);
+        food_vec_.erase(min_it);
         --interval_end;
-      } else if(min_distance < dots_[i].getSight()){
-        dots_[i].newFoodSource(food_[min_it - food_.begin()]);
+      } else if(min_distance < dots_vec_[i].getSight()){
+        dots_vec_[i].newFoodSource(food_vec_[min_it - food_vec_.begin()]);
       }
     } while(min_distance == 0);
   }
@@ -173,25 +178,25 @@ void Environment::printMap(){
   // Scale the the Environment down to 100x100 if testground_size_ is bigger than 100
   uint16_t scale = min((uint16_t)100, testground_size_);
   // Save scaled positions of Dots and foodsources
-  vector<vector<int>> map_d(scale, vector<int>(scale));
-  for (size_t i = 0; i < dots_.size(); ++i) {
-    ++map_d[(dots_[i].getPosition().first) * scale / testground_size_][(dots_[i].getPosition().second) * scale / testground_size_];
+  vector<vector<int> > map_dot_vec(scale, vector<int>(scale));
+  for (size_t i = 0; i < dots_vec_.size(); ++i) {
+    ++map_dot_vec[(dots_vec_[i].getPosition().first) * scale / testground_size_][(dots_vec_[i].getPosition().second) * scale / testground_size_];
   }
-  vector<vector<int>> map_f(scale, vector<int>(scale));
-  for (size_t i = 0; i < food_.size(); ++i) {
-    ++map_f[(food_[i].first) * scale / testground_size_][(food_[i].second) * scale / testground_size_];
+  vector<vector<int> > map_food_vec(scale, vector<int>(scale));
+  for (size_t i = 0; i < food_vec_.size(); ++i) {
+    ++map_food_vec[(food_vec_[i].first) * scale / testground_size_][(food_vec_[i].second) * scale / testground_size_];
   }
   // Output
   cout << "\n--- Aktuelle Karte der Testumgebung ---\n";
-  for (uint16_t i = 0; i < scale; ++i) {
-    for (uint16_t j = 0; j < scale; ++j) {
-      if (map_d[i][j] != 0) {
-        if (map_f[i][j] != 0) {
+  for (uint16_t j = 0; j < scale; ++j) {
+    for (uint16_t i = 0; i < scale; ++i) {
+      if (map_dot_vec[i][j] != 0) {
+        if (map_food_vec[i][j] != 0) {
           cout << "%";
         } else {
           cout << ".";
         }
-      } else if (map_f[i][j] != 0) {
+      } else if (map_food_vec[i][j] != 0) {
         cout << "x";
       } else {
         cout << " ";
@@ -203,11 +208,11 @@ void Environment::printMap(){
 }
 
 void Environment::printTestground(){
-  cout << "\n--- Eigenschaften der Testumgebung ---\nTestgroundsize: " << testground_size_ << "\nMin-|Maxfutter pro Tick: " << min_food_per_tick_ << "|"<< max_food_per_tick_ << "\nTick: " << tick_ << "\n#Dots: " << dots_.size() << "\n#Futter: " << food_.size() << "\n";
+  cout << "\n--- Eigenschaften der Testumgebung ---\nTestgroundsize: " << testground_size_ << "\nMin-|Maxfutter pro Tick: " << min_food_per_tick_ << "|"<< max_food_per_tick_ << "\nTick: " << tick_ << "\n#Dots: " << dots_vec_.size() << "\n#Futter: " << food_vec_.size() << "\n";
 }
 
 void Environment::printProperties(){
-  if(dots_.size() != 0){
+  if(dots_vec_.size() != 0){
     std::vector<uint16_t> speed_count_vec;
     uint16_t min_speed = ~0;
     uint16_t max_speed = 0;
@@ -220,11 +225,11 @@ void Environment::printProperties(){
     int max_energy = 0;
     int64_t sum_energy = 0;
 
-    for (size_t i = 0; i < dots_.size(); ++i) {
+    for (size_t i = 0; i < dots_vec_.size(); ++i) {
       // Get() properties once and save them
-      uint16_t dot_speed = dots_[i].getSpeed();
-      uint16_t dot_sight = dots_[i].getSight();
-      int dot_energy = dots_[i].getEnergy();
+      uint16_t dot_speed = dots_vec_[i].getSpeed();
+      uint16_t dot_sight = dots_vec_[i].getSight();
+      int dot_energy = dots_vec_[i].getEnergy();
 
       // Count occurences of specific values
       if(dot_speed > speed_count_vec.size()){
@@ -269,11 +274,11 @@ void Environment::printProperties(){
     for (size_t i = 1; i <= speed_count_vec.size(); ++i) {
       sum_speed += speed_count_vec[i-1]*(i);
     }
-    cout << "\n--- Werte von " << dots_.size() << " Dots in Tick " << tick_ << " ---\n";
+    cout << "\n--- Werte von " << dots_vec_.size() << " Dots in Tick " << tick_ << " ---\n";
     cout << "        | MIN | MAX | AVG |\n";
-    cout << "SIGHT:  |" << niceNumberPrint(min_sight, 5) << "|" << niceNumberPrint(max_sight, 5) << "|" << niceNumberPrint((float)sum_sight/dots_.size(), 5) << "|\n";
-    cout << "SPEED:  |" << niceNumberPrint(min_speed, 5) << "|" << niceNumberPrint(max_speed, 5) << "|" << niceNumberPrint((float)sum_speed/dots_.size(), 5) << "|\n";
-    cout << "ENERGY: |" << niceNumberPrint(min_energy, 5) << "|" << niceNumberPrint(max_energy, 5) << "|" << niceNumberPrint((float)sum_energy/dots_.size(), 5) << "|\n";
+    cout << "SIGHT:  |" << niceNumberPrint(min_sight, 5) << "|" << niceNumberPrint(max_sight, 5) << "|" << niceNumberPrint((float)sum_sight / dots_vec_.size(), 5) << "|\n";
+    cout << "SPEED:  |" << niceNumberPrint(min_speed, 5) << "|" << niceNumberPrint(max_speed, 5) << "|" << niceNumberPrint((float)sum_speed / dots_vec_.size(), 5) << "|\n";
+    cout << "ENERGY: |" << niceNumberPrint(min_energy, 5) << "|" << niceNumberPrint(max_energy, 5) << "|" << niceNumberPrint((float)sum_energy / dots_vec_.size(), 5) << "|\n";
 
     // Output of count-vectors
     cout << "Genaue Sightwerte:";
@@ -301,10 +306,10 @@ void Environment::printProperties(){
     }
     cout << line1 << line2;
 
-    cout << "\nIm aktuellen Tick sind " << food_.size() << " Futterstuecke auf dem Feld\n";
+    cout << "\nIm aktuellen Tick sind " << food_vec_.size() << " Futterstuecke auf dem Feld\n";
     if(debug || debug_env){
-      int f = food_.size();
-      int dots = dots_.size();
+      int f = food_vec_.size();
+      int dots = dots_vec_.size();
       int sum = 2 * f * log(f) + 2 * dots * (log(f) + log(f / 2) + pow(f * (sum_sight / dots) / testground_size_,2) + 2 * f * pow((sum_sight / dots) / testground_size_, 2));
       int sum2 = f * log(f) + dots * (log(f) + log(f / 2) + 2 * f * (sum_sight / dots) / testground_size_);
       cout << "Laufzeitanalyse Futtersuche (geschätzte Werte):\nNaiver Ansatz: " << f * dots << "\nSchnitt aus Intervallen aus sortierten Listen: " << sum << "\nIntervall einer sortierten Liste:  " << sum2 << "\n";

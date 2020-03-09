@@ -34,10 +34,10 @@ public:
   void printProperties();
 private:
   const std::uint16_t testground_size_; // Size of the Testground
-  std::vector<std::pair<std::uint16_t, std::uint16_t>> food_; //Positions of Food
+  std::vector<std::pair<std::uint16_t, std::uint16_t> > food_vec_; //Positions of Food
   int min_food_per_tick_;
   int max_food_per_tick_;
   Dot start_dot_;
-  std::vector<Dot> dots_; //Vector of all Dots
+  std::vector<Dot> dots_vec_; //Vector of all Dots
   uint32_t tick_;
 };
