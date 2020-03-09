@@ -35,8 +35,13 @@ Dot::Dot(const uint16_t testground_size, const int energy, const uint16_t speed,
   energy_(energy),
   reproduction_cooldown_(20),
   testground_size_(testground_size),
+<<<<<<< HEAD
   food_in_sight_(false),
   position_(pos)
+=======
+  position_(pos),
+  food_in_sight_(false)
+>>>>>>> c048e823c0d9bde1c33fb26286663c0c6cc0deee
 {
   direction_ = rand() % 360;
   food_in_sight_ = false;
