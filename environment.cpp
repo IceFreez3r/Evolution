@@ -20,7 +20,8 @@ Environment::Environment():
   max_food_per_tick_(200),
   start_dot_(Dot(testground_size_)),
   dots_vec_(),
-  tick_(0)
+  tick_(0),
+  mutagen_(false)
 {
   srand(time(NULL));
   contamination(1000);
@@ -31,7 +32,8 @@ Environment::Environment(const uint16_t testground_size, const int dot_count, co
   food_vec_(),
   start_dot_(Dot(testground_size_)),
   dots_vec_(),
-  tick_(0)
+  tick_(0),
+  mutagen_(false)
 {
   srand(time(NULL));
   changeFoodPerTick(min_food_count, max_food_count);
@@ -43,7 +45,8 @@ Environment::Environment(const uint16_t testground_size, const int dot_count, co
   food_vec_(),
   start_dot_(start_dot),
   dots_vec_(),
-  tick_(0)
+  tick_(0),
+  mutagen_(false)
 {
   srand(time(NULL));
   if(testground_size_ != start_dot_.getTestgroundSize()){
@@ -51,6 +54,16 @@ Environment::Environment(const uint16_t testground_size, const int dot_count, co
   }
   changeFoodPerTick(min_food_count, max_food_count);
   contamination(dot_count);
+}
+
+
+void Environment::placeMutagen(std::pair<std::uint16_t, std::uint16_t> pos){
+  mutagen_ = true;
+  mutagen_pos_ = pos;
+}
+
+void Environment::clearMutagen(){
+  mutagen_ = false;
 }
 
 void Environment::tick(const int amount /* = 1 */){
@@ -62,7 +75,12 @@ void Environment::tick(const int amount /* = 1 */){
     for (size_t i = 0; i < dots_vec_.size(); ++i) {
       dots_vec_[i].tick();
       if(dots_vec_[i].getReproductionCooldown() <= 0 && dots_vec_[i].getEnergy() >= 5000){
-        dots_vec_.push_back(dots_vec_[i].replicate(0.2)); // the mutationrate is constant at the moment, change here if wanted
+        double mutation_rate = 0.2; // the background_mutationrate is constant at the moment, change here if wanted
+        if(mutagen_){
+          uint16_t distance_to_mutagen = distance(dots_vec_[i].getPosition(), mutagen_pos_, testground_size_);
+          mutation_rate += 1/(distance_to_mutagen * distance_to_mutagen + 1);
+        }
+        dots_vec_.push_back(dots_vec_[i].replicate(mutation_rate));
       }
     }
     // Delete Dot with 0 energy or less
@@ -186,11 +204,17 @@ void Environment::printMap(){
   for (size_t i = 0; i < food_vec_.size(); ++i) {
     ++map_food_vec[(food_vec_[i].first) * scale / testground_size_][(food_vec_[i].second) * scale / testground_size_];
   }
+  vector<vector<int> > map_mutagen_vec(scale, vector<int>(scale));
+  if (mutagen_) {
+    ++map_mutagen_vec[(mutagen_pos_.first) * scale / testground_size_][(mutagen_pos_.second) * scale / testground_size_];
+  }
   // Output
   cout << "\n--- Aktuelle Karte der Testumgebung ---\n";
   for (uint16_t j = 0; j < scale; ++j) {
     for (uint16_t i = 0; i < scale; ++i) {
-      if (map_dot_vec[i][j] != 0) {
+      if (map_mutagen_vec[i][j] != 0) {
+        cout << "!";
+      } else if (map_dot_vec[i][j] != 0) {
         if (map_food_vec[i][j] != 0) {
           cout << "%";
         } else {
@@ -204,7 +228,7 @@ void Environment::printMap(){
     }
     cout << "\n";
   }
-  cout << "Legende: ' ' Nichts, '.' Dot, 'x' Essen, '%' Dot und Essen\nBei mehreren Objekten auf demselben Punkt wird nur eins angezeigt\nDie Ausgabe ist skaliert auf " << scale << "x" << scale << "\n";
+  cout << "Legende: ' ' Nichts, '!' Mutagen, '.' Dot, 'x' Essen, '%' Dot und Essen\nBei mehreren Objekten auf demselben Punkt wird nur eins angezeigt\nDie Ausgabe ist skaliert auf " << scale << "x" << scale << "\n";
 }
 
 void Environment::printTestground(){

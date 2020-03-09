@@ -14,7 +14,10 @@ public:
 
   // generates environment with given values and start Dots
   Environment(const std::uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count, const Dot start_dot);
-   // Triggers tick() function of every Dot and runs feeding(...), if amount is given the function is repeated multiple times
+  // creates an new mutagen or changes the position of the old one
+  void placeMutagen(std::pair<std::uint16_t, std::uint16_t> pos);
+  void clearMutagen();
+  // Triggers tick() function of every Dot and runs feeding(...), if amount is given the function is repeated multiple times
   void tick(const int amount = 1);
   // Places new Dots on the Testground with standard properties
   void contamination(const int amount);
@@ -26,13 +29,13 @@ public:
   // If min and max_amount are given, the function generates a random number
   // between them and places that many Foodsources
   void feeding();
-  // "Tells" a Dot if it can see food
-  void searchFood();
   // Prints the Positions of Dots and food scaled to a 100x100 matrix
   void printMap();
   void printTestground();
   void printProperties();
 private:
+  // "Tells" a Dot if it can see food
+  void searchFood();
   const std::uint16_t testground_size_; // Size of the Testground
   std::vector<std::pair<std::uint16_t, std::uint16_t> > food_vec_; //Positions of Food
   int min_food_per_tick_;
@@ -40,4 +43,6 @@ private:
   Dot start_dot_;
   std::vector<Dot> dots_vec_; //Vector of all Dots
   uint32_t tick_;
+  bool mutagen_;
+  std::pair<std::uint16_t, std::uint16_t> mutagen_pos_; //Position of Mutagen
 };
