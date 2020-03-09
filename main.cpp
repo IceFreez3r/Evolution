@@ -6,8 +6,10 @@ using namespace std;
 
 int main() {
   Dot d(1000, 10000, 10, 20, 100, make_pair(0,0));
-  Environment e(1000, 1000, 1, 100, d);
-  e.tick(1000);
-  e.printMap();
+  Environment e(1000, 10, 100, 100, d);
+  for (size_t i = 0; i < 10; ++i) {
+    e.tick(100);
+    e.printProperties();
+  }
   return 0;
 }

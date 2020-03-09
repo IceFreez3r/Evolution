@@ -18,7 +18,8 @@ public:
   // the dot can replicate, if it has enough energy and its reproduction cooldown is 0
   // this creates another dot in sight of this dot
   // the properties of the new dot are the same as the ones of the original dot with some mutations
-  Dot replicate();
+  // maximum change is dependent on the old value multiplied with the mutation_rate
+  Dot replicate(const double mutation_rate);
 
   //Gets triggered by environment if a food is in sight
   void newFoodSource(std::pair<uint16_t, uint16_t> food_pos);

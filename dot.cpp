@@ -14,16 +14,16 @@ Dot::Dot(const uint16_t testground_size):
 //start dots
   speed_(10),
   sight_(50),
-  size_(5)
+  size_(10),
+  energy_(7500),
+  reproduction_cooldown_(20),
+  testground_size_(testground_size),
+  food_in_sight_(false)
 {
-  energy_ = 7500;
-  reproduction_cooldown_ = 20;
-  testground_size_ = testground_size;
   uint16_t x = rand() % testground_size_;
   uint16_t y = rand() % testground_size_;
   position_ = make_pair(x, y);
   direction_ = rand() % 360;
-  food_in_sight_ = false;
   food_in_sight_pos_ = make_pair(0,0);
 }
 
@@ -31,18 +31,19 @@ Dot::Dot(const uint16_t testground_size, const int energy, const uint16_t speed,
 // start dots or replication
   speed_(speed),
   sight_(sight),
-  size_(size)
+  size_(size),
+  energy_(energy),
+  reproduction_cooldown_(20),
+  testground_size_(testground_size),
+  position_(pos),
+  food_in_sight_(false)
 {
-  energy_ = energy;
-  reproduction_cooldown_ = 20;
-  testground_size_ = testground_size;
-  position_ = pos;
   direction_ = rand() % 360;
   food_in_sight_ = false;
   food_in_sight_pos_ = make_pair(0,0);
 }
 
-Dot::Dot(const Dot &d, bool exact_copy /*= true*/):
+Dot::Dot(const Dot &d, bool exact_copy /* = true*/):
   speed_(d.speed_),
   sight_(d.sight_),
   size_(d.size_),
@@ -84,11 +85,13 @@ void Dot::tick(){
   --reproduction_cooldown_;
 }
 
-Dot Dot::replicate(){
+Dot Dot::replicate(const double mutation_rate){
+  uint16_t speed_change = max(1.0, (double)speed_ * mutation_rate);
+  uint16_t sight_change = max(1.0, (double)sight_ * mutation_rate);
+  uint16_t speed_new = max(speed_ + rand() % (speed_change * 2 + 1) - speed_change, 1);
+  uint16_t sight_new = max(sight_ + rand() % (sight_change * 2 + 1) - sight_change, 1);
   uint16_t x_new = (position_.first + rand() % (sight_ * 2 + 1) - sight_) % testground_size_;
   uint16_t y_new = (position_.second + rand() % (sight_ * 2 + 1) - sight_) % testground_size_;
-  uint16_t speed_new = max(speed_ + rand() % 5 - 2, 1);
-  uint16_t sight_new = max(sight_ + rand() % 7 - 3, 1);
   Dot child(testground_size_, energy_/2, speed_new, sight_new, size_, make_pair(x_new, y_new));
   energy_ /= 2;
   reproduction_cooldown_ = 20;
