@@ -15,6 +15,8 @@ public:
   // generates environment with given values and start Dots
   Environment(const std::uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count, const Dot start_dot);
   // creates an new mutagen or changes the position of the old one
+  void placeMutagen(std::vector<std::pair<std::uint16_t, std::uint16_t> > positions);
+  void placeMutagen(uint16_t amount = 1);
   void placeMutagen(std::pair<std::uint16_t, std::uint16_t> pos);
   void clearMutagen();
   // Triggers tick() function of every Dot and runs feeding(...), if amount is given the function is repeated multiple times
@@ -43,6 +45,5 @@ private:
   Dot start_dot_;
   std::vector<Dot> dots_vec_; //Vector of all Dots
   uint32_t tick_;
-  bool mutagen_;
-  std::pair<std::uint16_t, std::uint16_t> mutagen_pos_; //Position of Mutagen
+  std::vector<std::pair<std::uint16_t, std::uint16_t> >  mutagen_vec_; //Positions of Mutagen
 };

@@ -21,7 +21,7 @@ Environment::Environment():
   start_dot_(Dot(testground_size_)),
   dots_vec_(),
   tick_(0),
-  mutagen_(false)
+  mutagen_vec_()
 {
   srand(time(NULL));
   contamination(1000);
@@ -33,7 +33,7 @@ Environment::Environment(const uint16_t testground_size, const int dot_count, co
   start_dot_(Dot(testground_size_)),
   dots_vec_(),
   tick_(0),
-  mutagen_(false)
+  mutagen_vec_()
 {
   srand(time(NULL));
   changeFoodPerTick(min_food_count, max_food_count);
@@ -46,7 +46,7 @@ Environment::Environment(const uint16_t testground_size, const int dot_count, co
   start_dot_(start_dot),
   dots_vec_(),
   tick_(0),
-  mutagen_(false)
+  mutagen_vec_()
 {
   srand(time(NULL));
   if(testground_size_ != start_dot_.getTestgroundSize()){
@@ -56,14 +56,24 @@ Environment::Environment(const uint16_t testground_size, const int dot_count, co
   contamination(dot_count);
 }
 
+void Environment::placeMutagen(std::vector<std::pair<std::uint16_t, std::uint16_t> > positions){
+  mutagen_vec_.insert(mutagen_vec_.end(), positions.begin(), positions.end());
+}
+
+void Environment::placeMutagen(uint16_t amount /* = 1 */){
+  for (size_t i = 0; i < amount; ++i) {
+    uint16_t x_mut = rand() % testground_size_;
+    uint16_t y_mut = rand() % testground_size_;
+    mutagen_vec_.push_back(make_pair(x_mut, y_mut));
+  }
+}
 
 void Environment::placeMutagen(std::pair<std::uint16_t, std::uint16_t> pos){
-  mutagen_ = true;
-  mutagen_pos_ = pos;
+  mutagen_vec_.push_back(pos);
 }
 
 void Environment::clearMutagen(){
-  mutagen_ = false;
+  mutagen_vec_.clear();
 }
 
 void Environment::tick(const int amount /* = 1 */){
@@ -76,8 +86,8 @@ void Environment::tick(const int amount /* = 1 */){
       dots_vec_[i].tick();
       if(dots_vec_[i].getReproductionCooldown() <= 0 && dots_vec_[i].getEnergy() >= 5000){
         double mutation_rate = 0.2; // the background_mutationrate is constant at the moment, change here if wanted
-        if(mutagen_){
-          uint16_t distance_to_mutagen = distance(dots_vec_[i].getPosition(), mutagen_pos_, testground_size_);
+        for (size_t i = 0; i < mutagen_vec_.size(); ++i) {
+          uint16_t distance_to_mutagen = distance(dots_vec_[i].getPosition(), mutagen_vec_[i], testground_size_);
           mutation_rate += 1/(distance_to_mutagen * distance_to_mutagen + 1);
         }
         dots_vec_.push_back(dots_vec_[i].replicate(mutation_rate));
@@ -205,8 +215,8 @@ void Environment::printMap(){
     ++map_food_vec[(food_vec_[i].first) * scale / testground_size_][(food_vec_[i].second) * scale / testground_size_];
   }
   vector<vector<int> > map_mutagen_vec(scale, vector<int>(scale));
-  if (mutagen_) {
-    ++map_mutagen_vec[(mutagen_pos_.first) * scale / testground_size_][(mutagen_pos_.second) * scale / testground_size_];
+  for (size_t i = 0; i < mutagen_vec_.size(); ++i) {
+    ++map_mutagen_vec[(mutagen_vec_[i].first) * scale / testground_size_][(mutagen_vec_[i].second) * scale / testground_size_];
   }
   // Output
   cout << "\n--- Aktuelle Karte der Testumgebung ---\n";
