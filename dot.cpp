@@ -88,11 +88,13 @@ void Dot::tick(){
 Dot Dot::replicate(const double mutation_rate){
   uint16_t speed_change = max(1.0, (double)speed_ * mutation_rate);
   uint16_t sight_change = max(1.0, (double)sight_ * mutation_rate);
+  uint16_t size_change = max(1.0, (double)size_ * mutation_rate);
   uint16_t speed_new = max(speed_ + rand() % (speed_change * 2 + 1) - speed_change, 1);
   uint16_t sight_new = max(sight_ + rand() % (sight_change * 2 + 1) - sight_change, 1);
+  uint16_t size_new = max(size_ + rand() % (size_change * 2 + 1) - size_change, 1);
   uint16_t x_new = (position_.first + rand() % (sight_ * 2 + 1) - sight_) % testground_size_;
   uint16_t y_new = (position_.second + rand() % (sight_ * 2 + 1) - sight_) % testground_size_;
-  Dot child(testground_size_, energy_ / 2, speed_new, sight_new, size_, make_pair(x_new, y_new));
+  Dot child(testground_size_, energy_ / 2, speed_new, sight_new, size_new, make_pair(x_new, y_new));
   energy_ /= 2;
   reproduction_cooldown_ = 20;
   return child;
