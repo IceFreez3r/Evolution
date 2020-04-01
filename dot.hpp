@@ -23,16 +23,20 @@ public:
 
   //Gets triggered by environment if a food is in sight
   void newFoodSource(std::pair<uint16_t, uint16_t> food_pos);
+
+  //Gets triggered by environment if a bigger enemy is in sight
+  void newHazardSource(std::pair<uint16_t, uint16_t> hazard_pos);
+
   // Gets triggered by the environment if the dot reaches a food source
   void eat(int amount);
 
-  int getEnergy();
-  std::pair<std::uint16_t, std::uint16_t> getPosition();
-  int getReproductionCooldown();
-  uint16_t getSpeed();
-  uint16_t getSight();
-  uint16_t getSize();
-  uint16_t getTestgroundSize();
+  int getEnergy() const;
+  std::pair<std::uint16_t, std::uint16_t> getPosition() const;
+  int getReproductionCooldown() const;
+  uint16_t getSpeed() const;
+  uint16_t getSight() const;
+  uint16_t getSize() const;
+  uint16_t getTestgroundSize() const;
   void setTestgroundSize(uint16_t testground_size);
 
 private:
@@ -47,6 +51,8 @@ private:
   uint16_t testground_size_;
   bool food_in_sight_; // True, if a food source is in sight
   std::pair<uint16_t, uint16_t> food_in_sight_pos_; // position of the food source in sight
+  bool hazard_in_sight_; // True, if a food source is in sight
+  std::pair<uint16_t, uint16_t> hazard_in_sight_pos_; // position of the hazard source in sight
   std::pair<uint16_t, uint16_t> position_; // position on the Testground
   int16_t direction_; // direction of movement, (0 right, 90 up, 180 left, -90 down)
 };

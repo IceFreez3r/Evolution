@@ -18,13 +18,15 @@ Dot::Dot(const uint16_t testground_size):
   energy_(7500),
   reproduction_cooldown_(20),
   testground_size_(testground_size),
-  food_in_sight_(false)
+  food_in_sight_(false),
+  hazard_in_sight_(false)
 {
   uint16_t x = rand() % testground_size_;
   uint16_t y = rand() % testground_size_;
   position_ = make_pair(x, y);
   direction_ = rand() % 360;
   food_in_sight_pos_ = make_pair(0,0);
+  hazard_in_sight_pos_ = make_pair(0,0);
 }
 
 Dot::Dot(const uint16_t testground_size, const int energy, const uint16_t speed, const uint16_t sight, const uint16_t size, const pair<uint16_t, uint16_t> pos):
@@ -36,11 +38,13 @@ Dot::Dot(const uint16_t testground_size, const int energy, const uint16_t speed,
   reproduction_cooldown_(20),
   testground_size_(testground_size),
   food_in_sight_(false),
+  hazard_in_sight_(false),
   position_(pos)
 {
   direction_ = rand() % 360;
   food_in_sight_ = false;
   food_in_sight_pos_ = make_pair(0,0);
+  hazard_in_sight_pos_ = make_pair(0,0);
 }
 
 Dot::Dot(const Dot &d, bool exact_copy /* = true*/):
@@ -51,7 +55,9 @@ Dot::Dot(const Dot &d, bool exact_copy /* = true*/):
   reproduction_cooldown_(d.reproduction_cooldown_),
   testground_size_(d.testground_size_),
   food_in_sight_(d.food_in_sight_),
-  food_in_sight_pos_(d.food_in_sight_pos_)
+  food_in_sight_pos_(d.food_in_sight_pos_),
+  hazard_in_sight_(d.hazard_in_sight_),
+  hazard_in_sight_pos_(d.hazard_in_sight_pos_)
 {
 	if(exact_copy){
   	position_ = d.position_;
@@ -65,7 +71,17 @@ Dot::Dot(const Dot &d, bool exact_copy /* = true*/):
 }
 
 void Dot::tick(){
-  if (food_in_sight_) {
+  // First priority is to flee from hazards
+  if (hazard_in_sight_){
+    if (distance(position_, hazard_in_sight_pos_, testground_size_) > sight_ * 2){
+      hazard_in_sight_ = false;
+    } else {
+      direction_ = (direction(position_, food_in_sight_pos_, testground_size_) + 180) % 360;
+      position_ = move(position_, direction_, speed_, testground_size_);
+      energy_ -= pow(speed_, 2);
+    }
+  // Second priority is to move to food
+  } else if (food_in_sight_) {
     uint16_t dist = distance(position_,food_in_sight_pos_, testground_size_);
     if(dist < speed_){
       position_ = food_in_sight_pos_;
@@ -105,37 +121,42 @@ void Dot::newFoodSource(pair<uint16_t, uint16_t> food_pos){
   food_in_sight_pos_ = food_pos;
 }
 
+void Dot::newHazardSource(pair<uint16_t, uint16_t> hazard_pos){
+  hazard_in_sight_ = true;
+  hazard_in_sight_pos_ = hazard_pos;
+}
+
 void Dot::eat(int amount){
   energy_ += amount;
   food_in_sight_ = false;
 }
 
 // Get()- and Set()-Functions
-int Dot::getEnergy(){
+int Dot::getEnergy() const {
   return energy_;
 }
 
-pair<uint16_t, uint16_t> Dot::getPosition(){
+pair<uint16_t, uint16_t> Dot::getPosition() const {
   return position_;
 }
 
-int Dot::getReproductionCooldown(){
+int Dot::getReproductionCooldown() const {
   return reproduction_cooldown_;
 }
 
-uint16_t Dot::getSpeed(){
+uint16_t Dot::getSpeed() const {
   return speed_;
 }
 
-uint16_t Dot::getSight(){
+uint16_t Dot::getSight() const {
   return sight_;
 }
 
-uint16_t Dot::getSize(){
+uint16_t Dot::getSize() const {
   return size_;
 }
 
-uint16_t Dot::getTestgroundSize(){
+uint16_t Dot::getTestgroundSize() const {
   return testground_size_;
 }
 

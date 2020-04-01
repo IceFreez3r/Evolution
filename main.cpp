@@ -11,7 +11,7 @@ using namespace std;
 //   Dot d(1000, 10000, 10, 20, 100, make_pair(0,0));
 //   Environment e(1000, 10, 100, 100, d);
 //   Environment e2(1000, 10, 100, 100, d);
-//   e.printProperties();
+  // e.printProperties();
 //   e2.printProperties();
 //   e.placeMutagen(100);
 //   for (size_t i = 0; i < 10; ++i) {
@@ -26,15 +26,18 @@ using namespace std;
 // }
 
 int main(int argc, char const *argv[]) {
+  uint16_t ticks_at_once = 100;
   if (argc < 2) {
-    cerr << "Bitte die Anzahl an Ticks mitangeben. \n(Es werden im Moment nur 100er Werte verwendet)\n";
+    cerr << "Bitte die Anzahl an Ticks mitangeben. \n(Es wird im Moment auf den nächsten " << ticks_at_once << "er Wert abgerundet)\n";
     return 1;
   }
   Dot d(1000, 10000, 10, 20, 100, make_pair(0,0));
+  //Dot(const uint16_t testground_size, const int energy, const uint16_t speed, const uint16_t sight, const uint16_t size, const std::pair<uint16_t, uint16_t> pos);
   Environment e(1000, 10, 100, 100, d);
+  //Environment(const std::uint16_t testground_size, const int dot_count, const int min_food_count, const int max_food_count, const Dot start_dot);
   e.printProperties();
-  for (int i = 0; i < stoi(argv[1])/100; ++i) {
-    e.tick(100);
+  for (int i = 0; i < stoi(argv[1])/ticks_at_once; ++i) {
+    e.tick(ticks_at_once);
     e.printProperties();
   }
   return 0;
