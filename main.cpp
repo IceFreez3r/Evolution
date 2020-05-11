@@ -38,8 +38,8 @@ int main(int argc, char const *argv[]) {
   e.printProperties();
   for (int i = 0; i < stoi(argv[1])/ticks_at_once; ++i) {
     e.tick(ticks_at_once);
-    e.printProperties();
-    e.printMap();
+    // e.printProperties();
+    // e.printMap();
   }
   return 0;
 }

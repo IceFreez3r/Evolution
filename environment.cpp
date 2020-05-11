@@ -208,7 +208,6 @@ void Environment::printMap(){
   // Save scaled positions of Dots and foodsources
   vector<vector<int> > map_dot_vec(scale, vector<int>(scale));
   for (size_t i = 0; i < dots_vec_.size(); ++i) {
-    std::cerr << dots_vec_[i].getPosition().first << "   " << dots_vec_[i].getPosition().second << '\n';
     ++map_dot_vec[(dots_vec_[i].getPosition().first) * scale / testground_size_][(dots_vec_[i].getPosition().second) * scale / testground_size_];
   }
   vector<vector<int> > map_food_vec(scale, vector<int>(scale));

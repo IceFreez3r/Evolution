@@ -8,6 +8,10 @@ using namespace std;
 extern bool debug; // "extern" tells the compiler that debug is already declared somewhere else (environment.cpp)
 bool debug_util = false;
 
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 uint16_t distance(const pair<uint16_t, uint16_t> pos, const pair<uint16_t, uint16_t> pos2, const uint16_t testground_size){
   int x_diff = min(pos2.first - pos.first, testground_size - abs(pos2.first - pos.first));
   int y_diff = min(pos2.second - pos.second, testground_size - abs(pos2.second - pos.second));
@@ -44,9 +48,9 @@ uint16_t direction(const pair<uint16_t, uint16_t> start_pos, const pair<uint16_t
 }
 
 pair<uint16_t, uint16_t> move(const pair<uint16_t, uint16_t> pos, int16_t direction, const uint16_t step_size, const uint16_t testground_size){
-  uint16_t x_new = ((int)(cos(((float)direction)/360 * 2 * M_PI) * step_size) + pos.first) % testground_size;
+  uint16_t x_new = custom_mod(((int)(cos(((float)direction)/360 * 2 * M_PI) * step_size) + pos.first), testground_size);
   uint16_t y_new = custom_mod(((int)(sin(((float)direction)/360 * 2 * M_PI) * step_size) + pos.second), testground_size);
-  if(debug || debug_util){
+  if(debug || debug_util || x_new > 2000 || y_new > 2000){
     cout << "Neue Position von (" << pos.first << "," << pos.second << ") in Richtung " << direction << " und Weite " << step_size << ": (" << x_new << "," << y_new << ")\n";
   }
   return make_pair(x_new, y_new);
