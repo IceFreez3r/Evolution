@@ -66,7 +66,7 @@ std::string niceNumberPrint(const uint16_t number, uint8_t length){
   uint8_t back_spaces = (length - string_length) / 2;
   string out_string(front_spaces, ' ');
   out_string += to_string(number);
-  out.insert(back_spaces, ' ');
+  out_string.insert(back_spaces, ' ');
   return out_string;
 }
 //   2    3      4       5    ...
