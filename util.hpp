@@ -25,4 +25,6 @@ std::pair<uint16_t, uint16_t> move(const std::pair<uint16_t, uint16_t> pos, int1
 int signum(float val);
 // template <typename T> int signum(T val);
 
+int16_t custom_mod(int16_t value, int16_t testground_size);
+
 std::string niceNumberPrint(const uint16_t number, uint8_t length);

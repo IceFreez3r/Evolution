@@ -147,8 +147,8 @@ void Environment::searchFood(){
   }
   for (size_t i = 0; i < dots_vec_.size(); ++i) {
     // Calculate Min. und Max. X-values for each Dot
-    uint16_t min_x = (dots_vec_[i].getPosition().first - dots_vec_[i].getSight() + testground_size_) % testground_size_;
-    uint16_t max_x = (dots_vec_[i].getPosition().first + dots_vec_[i].getSight() + testground_size_) % testground_size_;
+    uint16_t min_x = custom_mod(dots_vec_[i].getPosition().first - dots_vec_[i].getSight(), testground_size_);
+    uint16_t max_x = custom_mod(dots_vec_[i].getPosition().first + dots_vec_[i].getSight(), testground_size_);
 
     // Find interval for x values of food_vec_
     auto interval_start = find_if(food_vec_.begin(), food_vec_.end(), [&min_x](const pair<uint16_t, uint16_t>& food) {
@@ -208,6 +208,7 @@ void Environment::printMap(){
   // Save scaled positions of Dots and foodsources
   vector<vector<int> > map_dot_vec(scale, vector<int>(scale));
   for (size_t i = 0; i < dots_vec_.size(); ++i) {
+    std::cerr << dots_vec_[i].getPosition().first << "   " << dots_vec_[i].getPosition().second << '\n';
     ++map_dot_vec[(dots_vec_[i].getPosition().first) * scale / testground_size_][(dots_vec_[i].getPosition().second) * scale / testground_size_];
   }
   vector<vector<int> > map_food_vec(scale, vector<int>(scale));

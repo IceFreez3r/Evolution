@@ -86,12 +86,17 @@ void Dot::tick(){
 }
 
 Dot Dot::replicate(const double mutation_rate){
-  uint16_t speed_change = max(1.0, (double)speed_ * mutation_rate);
-  uint16_t sight_change = max(1.0, (double)sight_ * mutation_rate);
+  uint16_t speed_change = max((uint16_t)1, (uint16_t)((double)speed_ * mutation_rate));
+  uint16_t sight_change = max((uint16_t)1, (uint16_t)((double)sight_ * mutation_rate));
   uint16_t speed_new = max(speed_ + rand() % (speed_change * 2 + 1) - speed_change, 1);
   uint16_t sight_new = max(sight_ + rand() % (sight_change * 2 + 1) - sight_change, 1);
-  uint16_t x_new = (position_.first + rand() % (sight_ * 2 + 1) - sight_) % testground_size_;
-  uint16_t y_new = (position_.second + rand() % (sight_ * 2 + 1) - sight_) % testground_size_;
+  uint16_t x_new = custom_mod(position_.first + rand() % (sight_ * 2 + 1) - sight_, testground_size_);
+  uint16_t y_new = custom_mod(position_.second + rand() % (sight_ * 2 + 1) - sight_, testground_size_);
+  if (x_new > testground_size_ || y_new > testground_size_) {
+    std::cout << "replicate" << '\n';
+    std::cout << "old:" << position_.first << "  " << position_.second << '\n';
+    std::cout << "new:" << x_new << "  " << y_new << '\n';
+  }
   Dot child(testground_size_, energy_ / 2, speed_new, sight_new, size_, make_pair(x_new, y_new));
   energy_ /= 2;
   reproduction_cooldown_ = 20;
