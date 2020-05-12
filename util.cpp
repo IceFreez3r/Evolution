@@ -8,6 +8,10 @@ using namespace std;
 extern bool debug; // "extern" tells the compiler that debug is already declared somewhere else (environment.cpp)
 bool debug_util = false;
 
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 uint16_t distance(const pair<uint16_t, uint16_t> pos, const pair<uint16_t, uint16_t> pos2, const uint16_t testground_size){
   int x_diff = min(pos2.first - pos.first, testground_size - abs(pos2.first - pos.first));
   int y_diff = min(pos2.second - pos.second, testground_size - abs(pos2.second - pos.second));
