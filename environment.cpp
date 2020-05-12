@@ -150,7 +150,7 @@ void Environment::searchFood(){
     uint16_t min_x = (dots_vec_[i].getPosition().first - dots_vec_[i].getSight() + testground_size_) % testground_size_;
     uint16_t max_x = (dots_vec_[i].getPosition().first + dots_vec_[i].getSight() + testground_size_) % testground_size_;
 
-    // Find interval for x values of food_vec_
+    // Find interval [start, end) for x values of food_vec_
     auto interval_start = find_if(food_vec_.begin(), food_vec_.end(), [&min_x](const pair<uint16_t, uint16_t>& food) {
       return food.first >= min_x;
     });
@@ -167,14 +167,14 @@ void Environment::searchFood(){
         // the map. This creates some kinda weird interval:
         // |-.--->         <--|, so we need 2 for-loops
         for (auto j = food_vec_.begin(); j < interval_end; ++j) {
-          uint16_t dist = distance(dots_vec_[i].getPosition(), food_vec_[j - food_vec_.begin()], testground_size_);
+          uint16_t dist = distance(dots_vec_[i].getPosition(), *j, testground_size_);
           if(dist < min_distance){
             min_it = j;
             min_distance = dist;
           }
         }
         for (auto j = interval_start; j < food_vec_.end(); ++j) {
-          uint16_t dist = distance(dots_vec_[i].getPosition(), food_vec_[j - food_vec_.begin()], testground_size_);
+          uint16_t dist = distance(dots_vec_[i].getPosition(), *j, testground_size_);
           if(dist < min_distance){
             min_it = j;
             min_distance = dist;
@@ -183,7 +183,7 @@ void Environment::searchFood(){
       } else {
         // normal case: |  <---.--->       |
         for (auto j = interval_start; j < interval_end; ++j) {
-          uint16_t dist = distance(dots_vec_[i].getPosition(), food_vec_[j - food_vec_.begin()], testground_size_);
+          uint16_t dist = distance(dots_vec_[i].getPosition(), *j, testground_size_);
           if(dist < min_distance){
             min_it = j;
             min_distance = dist;
@@ -196,7 +196,7 @@ void Environment::searchFood(){
         food_vec_.erase(min_it);
         --interval_end;
       } else if(min_distance < dots_vec_[i].getSight()){
-        dots_vec_[i].newFoodSource(food_vec_[min_it - food_vec_.begin()]);
+        dots_vec_[i].newFoodSource(*min_it);
       }
     } while(min_distance == 0);
   }
