@@ -1,0 +1,36 @@
+{
+	"Dots": {
+		"Speed": 10,
+		"Sight": 10,
+		"Size": 10,
+		"StartEnergy": 10000
+	},
+	"Environment": {
+		"TestgroundSize": 1000,
+		"StartDots": 10,
+		"MinFoodPerTick": 100,
+		"MaxFoodPerTick": 200,
+		"Mutagens": 0
+	},
+	"Output": {
+		"Start": {
+			"Map": false,
+			"Testground": true,
+			"Properties": false
+		},
+		"InLoop": {
+			"Map": false,
+			"Testground": false,
+			"Properties": true
+		},
+		"End": {
+			"Map": true,
+			"Testground": false,
+			"Properties": true
+		}
+	},
+	"Ticks": {
+		"total": 10000,
+		"perLoopPass": 100
+	}
+}
