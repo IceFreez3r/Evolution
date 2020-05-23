@@ -134,7 +134,9 @@ void Environment::feeding(){
   for (int i = 0; i < food_count; ++i) {
     uint16_t x = rand() % testground_size_;
     uint16_t y = rand() % testground_size_;
-    food_vec_.push_back(make_pair(x,y));
+    std::pair<uint16_t, uint16_t> new_food = make_pair(x,y);
+    // food_vec_.push_back(make_pair(x,y));
+    food_vec_.insert(std::lower_bound(food_vec_.begin(), food_vec_.end(), new_food), new_food);
   }
 }
 
