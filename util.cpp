@@ -5,6 +5,10 @@
 
 using namespace std;
 
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 extern bool debug; // "extern" tells the compiler that debug is already declared somewhere else (environment.cpp)
 bool debug_util = false;
 

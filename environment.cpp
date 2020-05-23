@@ -1,5 +1,5 @@
 #include <iostream>
-#include <algorithm>
+#include <algorithm> //inplace_merge()
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
@@ -136,10 +136,18 @@ void Environment::feeding(){
     uint16_t y = rand() % testground_size_;
     food_vec_.push_back(make_pair(x,y));
   }
+  sort(food_vec_.end() - food_count,food_vec_.end());
+  std::inplace_merge(food_vec_.begin(), food_vec_.end() - food_count, food_vec_.end());
+  // if(tick_ == 100){
+  //   for (size_t i = 0; i < food_vec_.size(); ++i) {
+  //     std::cout << food_vec_[i].first << "   " << food_vec_[i].second << "\n";
+  //   }
+  //   std::cout << "------------" << '\n';
+  // }
 }
 
 void Environment::searchFood(){
-  sort(food_vec_.begin(), food_vec_.end());
+  // sort(food_vec_.begin(), food_vec_.end());
   if (debug || debug_env) {
     for (size_t i = 0; i < food_vec_.size(); ++i) {
       cout << "(" << food_vec_[i].first << "," << food_vec_[i].first << ")\n";
