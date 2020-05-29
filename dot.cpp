@@ -99,8 +99,12 @@ Dot Dot::replicate(const double mutation_rate){
 }
 
 void Dot::newFoodSource(pair<uint16_t, uint16_t> food_pos){
-  food_in_sight_ = true;
-  food_in_sight_pos_ = food_pos;
+  uint16_t dist = distance(food_pos, position_, testground_size_);
+  if(dist < sight_ && (!food_in_sight_ || dist < food_in_sight_dist_)){
+    food_in_sight_ = true;
+    food_in_sight_pos_ = food_pos;
+    food_in_sight_dist_ = dist;
+  }
 }
 
 void Dot::eat(int amount){
@@ -109,31 +113,31 @@ void Dot::eat(int amount){
 }
 
 // Get()- and Set()-Functions
-int Dot::getEnergy(){
+int Dot::getEnergy() const{
   return energy_;
 }
 
-pair<uint16_t, uint16_t> Dot::getPosition(){
+pair<uint16_t, uint16_t> Dot::getPosition() const{
   return position_;
 }
 
-int Dot::getReproductionCooldown(){
+int Dot::getReproductionCooldown() const{
   return reproduction_cooldown_;
 }
 
-uint16_t Dot::getSpeed(){
+uint16_t Dot::getSpeed() const{
   return speed_;
 }
 
-uint16_t Dot::getSight(){
+uint16_t Dot::getSight() const{
   return sight_;
 }
 
-uint16_t Dot::getSize(){
+uint16_t Dot::getSize() const{
   return size_;
 }
 
-uint16_t Dot::getTestgroundSize(){
+uint16_t Dot::getTestgroundSize() const{
   return testground_size_;
 }
 
