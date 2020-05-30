@@ -140,23 +140,28 @@ void Environment::feeding(){
 
 void Environment::searchFood(){
   // Based on this answer: https://stackoverflow.com/a/59432406/12540220
-  uint16_t grid_size = 20;
+  uint16_t grid_size = 50;
+  uint16_t grid_length = testground_size_ / 50;
   // Only save indices of Dots in dots_vec_
   std::vector<std::vector<std::vector<size_t> > > grid(grid_size, std::vector<std::vector<size_t> > (grid_size));
   for(size_t i = 0; i < dots_vec_.size(); ++i){
     const std::pair<uint16_t, uint16_t>& dot_pos = dots_vec_[i].getPosition();
-    const std::pair<uint16_t, uint16_t> grid_pos(dot_pos.first / grid_size, dot_pos.second / grid_size);
-    uint16_t neighborhood = ceil(dots_vec_[i].getSight()/grid_size);
+    const std::pair<uint16_t, uint16_t> grid_pos(dot_pos.first / grid_length, dot_pos.second / grid_length);
+    uint16_t neighborhood = ceil(dots_vec_[i].getSight()/grid_length);
     for(int16_t j = grid_pos.first - neighborhood; j <= grid_pos.first + neighborhood; ++j){
       for(int16_t k = grid_pos.second; k <= grid_pos.second + neighborhood; ++k){
         grid[((j + grid_size) % grid_size)][((k + grid_size) % grid_size)].push_back(i);
       }
     }
   }
-  for(auto const & food : food_vec_){
-    std::pair<uint16_t, uint16_t> grid_pos(food.first / grid_size, food.second / grid_size);
-    for(size_t i = 0; i < grid[grid_pos.first][grid_pos.second].size(); ++i){
-      dots_vec_[grid[grid_pos.first][grid_pos.second][i]].newFoodSource(food);
+  std::vector<bool> remove_food(food_vec_.size(), false);
+  for(size_t i = 0; i < food_vec_.size(); ++i){
+    std::pair<uint16_t, uint16_t> grid_pos(food_vec_[i].first / grid_length, food_vec_[i].second / grid_length);
+    for(size_t j = 0; j < grid[grid_pos.first][grid_pos.second].size(); ++j){
+      if(dots_vec_[grid[grid_pos.first][grid_pos.second][j]].newFoodSource(food_vec_[i])){
+        remove_food[i] = true;
+        break;
+      }
     }
   }
 }

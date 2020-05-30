@@ -21,8 +21,9 @@ public:
   // maximum change is dependent on the old value multiplied with the mutation_rate
   Dot replicate(const double mutation_rate);
 
-  //Gets triggered by environment if a food is in sight
-  void newFoodSource(std::pair<uint16_t, uint16_t> food_pos);
+  // Gets triggered by environment if a food might be in sight
+  // Returns true if the food got eaten, false if not
+  bool newFoodSource(std::pair<uint16_t, uint16_t> food_pos);
   // Gets triggered by the environment if the dot reaches a food source
   void eat(int amount);
 
