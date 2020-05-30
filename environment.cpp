@@ -164,6 +164,14 @@ void Environment::searchFood(){
       }
     }
   }
+  // food_vec_.erase(remove_if(food_vec_.begin(), food_vec_.end(), [& remove_food](std::pair<uint16_t, uint16_t> &food){
+  //   return remove_food[];
+  // }), food_vec_.end());
+  for(size_t i = remove_food.size(); i != 0; --i){
+    if(remove_food[i - 1]){
+      food_vec_.erase(food_vec_.begin() + i - 1);
+    }
+  }
 }
 
 void Environment::printMap(){
