@@ -98,18 +98,12 @@ Dot Dot::replicate(const double mutation_rate){
   return child;
 }
 
-bool Dot::newFoodSource(pair<uint16_t, uint16_t> food_pos){
-  uint16_t dist = distance(food_pos, position_, testground_size_);
-  if (dist == 0) {
-    eat(1000);
-    return true;
-  }
-  if(dist < sight_ && (!food_in_sight_ || dist < food_in_sight_dist_)){
+void Dot::newFoodSource(pair<uint16_t, uint16_t> food_pos, uint16_t dist){
+  if(!food_in_sight_ || dist < food_in_sight_dist_){
     food_in_sight_ = true;
     food_in_sight_pos_ = food_pos;
     food_in_sight_dist_ = dist;
   }
-  return false;
 }
 
 void Dot::eat(int amount){

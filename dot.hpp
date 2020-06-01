@@ -23,7 +23,7 @@ public:
 
   // Gets triggered by environment if a food might be in sight
   // Returns true if the food got eaten, false if not
-  bool newFoodSource(std::pair<uint16_t, uint16_t> food_pos);
+  void newFoodSource(std::pair<uint16_t, uint16_t> food_pos, uint16_t dist);
   // Gets triggered by the environment if the dot reaches a food source
   void eat(int amount);
 
