@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <fstream> //file
 
 #include "environment.hpp"
 
@@ -351,4 +352,16 @@ void Environment::printProperties(){
   } else {
     cout << "Im Tick " << tick_ << " sind keine Dots mehr am Leben.\n";
   }
+}
+
+// was passieren soll: Räuber-Beute-Visualisieren, Alle x Ticks die Dotzahlen und die Futterzahlen in eine Datei packen.
+// Vorschlag für Datei: Ticknummer;Dotzahlen;Foodzahlen
+//                      10;1;20
+void getStatistics(){
+  std::ofstream file;
+  file.open("evo_test.txt");
+  file << "Kilian ist doof" << "\n";
+  file << "Noch etwas hinzugefügt";
+  file << " Ende;" << "Tschau";
+  file.close();
 }

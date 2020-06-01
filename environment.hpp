@@ -37,6 +37,10 @@ public:
   void printTestground();
   // Prints a summary of the properties of all Dpts.
   void printProperties();
+  // writes Data to a file
+  void getStatistics();
+
+
 private:
   // "Tells" a Dot if it can see food
   void searchFood();
