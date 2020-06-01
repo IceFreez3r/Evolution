@@ -22,11 +22,12 @@ public:
   Dot replicate(const double mutation_rate);
 
   // Gets triggered by environment if a food might be in sight
-  // updates the next available food and its distance 
-  void newFoodSource(std::pair<uint16_t, uint16_t> food_pos, uint16_t dist);
+  // updates food_in_sight_, food_in_sight_idx_, food_in_sight_pos_, food_in_sight_dist_
+  void newFoodSource(std::pair<uint16_t, uint16_t> food_pos, std::size_t idx, uint16_t dist);
   // Gets triggered by the environment if the dot reaches a food source
   void eat(int amount);
 
+  // Get- and Set-Functions
   int getEnergy() const;
   std::pair<std::uint16_t, std::uint16_t> getPosition() const;
   int getReproductionCooldown() const;
@@ -35,6 +36,9 @@ public:
   uint16_t getSize() const;
   uint16_t getTestgroundSize() const;
   void setTestgroundSize(uint16_t testground_size);
+  bool getFoodInSight() const;
+  void setFoodInSight(bool food_in_sight);
+  std::size_t getFoodInSightIdx() const;
 
 private:
   // Constant properties
@@ -47,7 +51,8 @@ private:
   int reproduction_cooldown_; // time until the dot can replicate again
   uint16_t testground_size_;
   bool food_in_sight_; // True, if a food source is in sight
-  std::pair<uint16_t, uint16_t> food_in_sight_pos_; // position of the food source in sight
+  std::size_t food_in_sight_idx_; // index of the food source in sight
+  std::pair<std::uint16_t, std::uint16_t> food_in_sight_pos_; // position of the food source in sight
   uint16_t food_in_sight_dist_;
   std::pair<uint16_t, uint16_t> position_; // position on the Testground
   int16_t direction_; // direction of movement, (0 right, 90 up, 180 left, -90 down)

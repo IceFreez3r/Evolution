@@ -50,8 +50,7 @@ Dot::Dot(const Dot &d, bool exact_copy /* = true*/):
   energy_(d.energy_),
   reproduction_cooldown_(d.reproduction_cooldown_),
   testground_size_(d.testground_size_),
-  food_in_sight_(d.food_in_sight_),
-  food_in_sight_pos_(d.food_in_sight_pos_)
+  food_in_sight_(false)
 {
 	if(exact_copy){
   	position_ = d.position_;
@@ -62,14 +61,14 @@ Dot::Dot(const Dot &d, bool exact_copy /* = true*/):
 		position_ = make_pair(x, y);
 		direction_ = rand() % 360;
 	}
+  food_in_sight_pos_ = make_pair(0,0);
 }
 
 void Dot::tick(){
   if (food_in_sight_) {
-    uint16_t dist = distance(position_,food_in_sight_pos_, testground_size_);
-    if(dist < speed_){
+    if(food_in_sight_dist_ < speed_){
       position_ = food_in_sight_pos_;
-      energy_ -= dist * speed_;
+      energy_ -= food_in_sight_dist_ * speed_;
     } else {
       direction_ = direction(position_, food_in_sight_pos_, testground_size_);
       position_ = move(position_, direction_, speed_, testground_size_);
@@ -98,17 +97,17 @@ Dot Dot::replicate(const double mutation_rate){
   return child;
 }
 
-void Dot::newFoodSource(pair<uint16_t, uint16_t> food_pos, uint16_t dist){
+void Dot::newFoodSource(pair<uint16_t, uint16_t> food_pos, size_t idx, uint16_t dist){
   if(!food_in_sight_ || dist < food_in_sight_dist_){
     food_in_sight_ = true;
     food_in_sight_pos_ = food_pos;
+    food_in_sight_idx_ = idx;
     food_in_sight_dist_ = dist;
   }
 }
 
 void Dot::eat(int amount){
   energy_ += amount;
-  food_in_sight_ = false;
 }
 
 // Get()- and Set()-Functions
@@ -142,4 +141,16 @@ uint16_t Dot::getTestgroundSize() const{
 
 void Dot::setTestgroundSize(uint16_t testground_size){
   testground_size_ = testground_size;
+}
+
+bool Dot::getFoodInSight() const{
+  return food_in_sight_;
+}
+
+void Dot::setFoodInSight(bool food){
+  food_in_sight_ = food;
+}
+
+std::size_t Dot::getFoodInSightIdx() const{
+  return food_in_sight_idx_;
 }

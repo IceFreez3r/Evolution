@@ -139,6 +139,29 @@ void Environment::feeding(){
 }
 
 void Environment::searchFood(){
+  // Remove food exactly below Dots first
+  std::vector<bool> remove_food(food_vec_.size(), false);
+  for (size_t i = 0; i < dots_vec_.size(); ++i) {
+    if(dots_vec_[i].getFoodInSight()){
+      if(!(remove_food[dots_vec_[i].getFoodInSightIdx()]) && dots_vec_[i].getPosition() == food_vec_[dots_vec_[i].getFoodInSightIdx()]){
+        dots_vec_[i].eat(1000);
+        remove_food[dots_vec_[i].getFoodInSightIdx()] = true;
+      }
+    }
+  }
+  // Remove eaten food
+  // food_vec_.erase(remove_if(food_vec_.begin(), food_vec_.end(), [& remove_food](std::pair<uint16_t, uint16_t> &food){
+  //   return remove_food[];
+  // }), food_vec_.end());
+  for(size_t i = remove_food.size(); i != 0; --i){
+    if(remove_food[i - 1]){
+      food_vec_.erase(food_vec_.begin() + i - 1);
+    }
+  }
+  for(size_t i = 0; i < dots_vec_.size(); ++i){
+    dots_vec_[i].setFoodInSight(false);
+  }
+  // Calculate distance for the rest-food
   // Based on this answer: https://stackoverflow.com/a/59432406/12540220
   uint16_t grid_size = 50;
   uint16_t grid_length = testground_size_ / grid_size;
@@ -154,28 +177,14 @@ void Environment::searchFood(){
       }
     }
   }
-  std::vector<bool> remove_food(food_vec_.size(), false);
   for(size_t i = 0; i < food_vec_.size(); ++i){
     std::pair<uint16_t, uint16_t> grid_pos(food_vec_[i].first / grid_length, food_vec_[i].second / grid_length);
     for(size_t j = 0; j < grid[grid_pos.first][grid_pos.second].size(); ++j){
       Dot& dot = dots_vec_[grid[grid_pos.first][grid_pos.second][j]];
       uint16_t dist = distance(food_vec_[i], dot.getPosition(), testground_size_);
-      if(dist == 0){
-        dot.eat(1000);
-        remove_food[i] = true;
-        break;
-      }
       if(dist < dot.getSight()){
-        dot.newFoodSource(food_vec_[i], dist);
+        dot.newFoodSource(food_vec_[i], i, dist);
       }
-    }
-  }
-  // food_vec_.erase(remove_if(food_vec_.begin(), food_vec_.end(), [& remove_food](std::pair<uint16_t, uint16_t> &food){
-  //   return remove_food[];
-  // }), food_vec_.end());
-  for(size_t i = remove_food.size(); i != 0; --i){
-    if(remove_food[i - 1]){
-      food_vec_.erase(food_vec_.begin() + i - 1);
     }
   }
 }
@@ -214,7 +223,7 @@ void Environment::printMap(){
         cout << " ";
       }
     }
-    cout << "\n";
+    cout << "|\n";
   }
   cout << "Legende: ' ' Nichts, '!' Mutagen, '.' Dot, 'x' Essen, '%' Dot und Essen\nBei mehreren Objekten auf demselben Punkt wird nur eins angezeigt\nDie Ausgabe ist skaliert auf " << scale << "x" << scale << "\n";
 }
