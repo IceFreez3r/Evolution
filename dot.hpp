@@ -22,7 +22,7 @@ public:
   Dot replicate(const double mutation_rate);
 
   // Gets triggered by environment if a food might be in sight
-  // Returns true if the food got eaten, false if not
+  // updates the next available food and its distance 
   void newFoodSource(std::pair<uint16_t, uint16_t> food_pos, uint16_t dist);
   // Gets triggered by the environment if the dot reaches a food source
   void eat(int amount);
