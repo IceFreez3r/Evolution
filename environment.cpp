@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <string> //getStatistics (to write)
 #include <fstream> //file
 
 #include "environment.hpp"
@@ -98,6 +99,11 @@ void Environment::tick(const int amount /* = 1 */){
     dots_vec_.erase(remove_if(dots_vec_.begin(), dots_vec_.end(), [](Dot &d){
       return d.getEnergy() <= 0;
     }), dots_vec_.end());
+
+    if(!(tick_ % 10)){
+      getStatistics();
+    }
+
     ++tick_;
 
     if(debug || debug_env){
@@ -357,11 +363,14 @@ void Environment::printProperties(){
 // was passieren soll: Räuber-Beute-Visualisieren, Alle x Ticks die Dotzahlen und die Futterzahlen in eine Datei packen.
 // Vorschlag für Datei: Ticknummer;Dotzahlen;Foodzahlen
 //                      10;1;20
-void getStatistics(){
+void Environment::getStatistics(/*String filename (?)*/){
   std::ofstream file;
-  file.open("evo_test.txt");
-  file << "Kilian ist doof" << "\n";
-  file << "Noch etwas hinzugefügt";
-  file << " Ende;" << "Tschau";
+  if(tick_ == 0){
+    file.open("evo_test.csv", std::ios::trunc);
+    file << "ticknumber;dot_count;food_count\n";
+    file.close();
+  }
+  file.open("evo_test.csv", std::ios::app);
+  file << tick_ << ";" << dots_vec_.size() << ";" << food_vec_.size() << "\n";//Warum write? So brauchst du einen String extra internetz idk, ofstream ist schon ineffizient genug xD
   file.close();
 }
