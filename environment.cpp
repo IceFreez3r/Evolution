@@ -99,10 +99,15 @@ void Environment::tick(const int amount /* = 1 */){
     dots_vec_.erase(remove_if(dots_vec_.begin(), dots_vec_.end(), [](Dot &d){
       return d.getEnergy() <= 0;
     }), dots_vec_.end());
-
-    if(!(tick_ % 10)){
-      getStatistics();
-    }
+    //runs it one in 10 times
+    // if(!(tick_ % 10)){
+    //   getStatistics();
+    // }
+    // if(tick_ > 2000){
+    //   getStatistics();
+    // }
+    // runs it in every tick
+    getStatistics();
 
     ++tick_;
 
@@ -360,17 +365,25 @@ void Environment::printProperties(){
   }
 }
 
-// was passieren soll: Räuber-Beute-Visualisieren, Alle x Ticks die Dotzahlen und die Futterzahlen in eine Datei packen.
-// Vorschlag für Datei: Ticknummer;Dotzahlen;Foodzahlen
-//                      10;1;20
+// It writs the tick, dot and food count in a file
+// example file: Ticknummer;Dotzahlen;Foodzahlen
+//                      0;1;100
 void Environment::getStatistics(/*String filename (?)*/){
-  std::ofstream file;
+  std::ofstream dot;
+  std::ofstream food;
+
   if(tick_ == 0){
-    file.open("evo_test.csv", std::ios::trunc);
-    file << "ticknumber;dot_count;food_count\n";
-    file.close();
+    dot.open("dot_count.csv", std::ios::trunc);
+    dot << "ticknumber;dot_count\n";
+    dot.close();
+    food.open("food_count.csv", std::ios::trunc);
+    food << "ticknumber;food_count\n";
+    food.close();
   }
-  file.open("evo_test.csv", std::ios::app);
-  file << tick_ << ";" << dots_vec_.size() << ";" << food_vec_.size() << "\n";//Warum write? So brauchst du einen String extra internetz idk, ofstream ist schon ineffizient genug xD
-  file.close();
+  dot.open("dot_count.csv", std::ios::app);
+  dot << tick_ << ";" << dots_vec_.size() << "\n";
+  dot.close();
+  food.open("food_count.csv", std::ios::app);
+  food << tick_ << ";" << food_vec_.size() << "\n";
+  food.close();
 }
