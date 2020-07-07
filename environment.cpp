@@ -191,88 +191,170 @@ void Environment::searchFood(){
 }
 
 void Environment::cannibalism(){
-  // sort the Dot-vector controlled by the position of the Dots
-  sort(dots_vec_.begin(), dots_vec_.end(), [](const Dot& a, const Dot& b){
-    return a.getPosition() < b.getPosition();
-  });
-  // save the position of the Dots alone
-  vector<pair<uint16_t, uint16_t> > dot_positions(dots_vec_.size());
-  for (size_t i = 0; i < dots_vec_.size(); ++i) {
-    dot_positions[i] = dots_vec_[i].getPosition();
-  }
-  for (size_t i = 0; i < dot_positions.size(); ++i) {
-    // Calculate Min. und Max. X-values for each Dot
-    uint16_t min_x = (dot_positions[i].first - dots_vec_[i].getSight() + testground_size_) % testground_size_;
-    uint16_t max_x = (dot_positions[i].first + dots_vec_[i].getSight() + testground_size_) % testground_size_;
+  // Remove food exactly below Dots first
+  std::vector<bool> remove_dot(food_vec_.size(), false);
+  std::cout << __LINE__ << '\n';
 
-    // Find interval for x values of food_vec_
-    auto interval_start = find_if(dot_positions.begin(), dot_positions.end(), [& min_x](const pair<uint16_t, uint16_t>& dot) {
-      return dot.first >= min_x;
-    });
-    auto interval_end = find_if(dot_positions.begin(), dot_positions.end(), [& max_x](const pair<uint16_t, uint16_t>& dot) {
-      return dot.first > max_x;
-    });
-    uint16_t min_distance;
-    do {
-      // Calculate exact distance for food in interval
-      auto min_it = interval_end;
-      min_distance = ~0;
-      if(interval_end <= interval_start){
-        // Dots close to the edge can see food sources on the other side of
-        // the map. This creates some kinda weird interval:
-        // |-.--->         <--|, so we need 2 for-loops
-        for (auto j = dot_positions.begin(); j < interval_end; ++j) {
-          uint16_t dist = distance(dot_positions[i], *j, testground_size_);
-          if(dist < min_distance){
-            min_it = j;
-            min_distance = dist;
-          }
-        }
-        for (auto j = interval_start; j < dot_positions.end(); ++j) {
-          uint16_t dist = distance(dot_positions[i], *j, testground_size_);
-          if(dist < min_distance){
-            min_it = j;
-            min_distance = dist;
-          }
-        }
-      } else {
-        // normal case: |  <---.--->       |
-        for (auto j = interval_start; j < interval_end; ++j) {
-          uint16_t dist = distance(dot_positions[i], *j, testground_size_);
-          if(dist < min_distance){
-            min_it = j;
-            min_distance = dist;
-          }
+  for (size_t i = 0; i < dots_vec_.size(); ++i) {
+    if(dots_vec_[i].getPreyInSight()){
+      std::cout << __LINE__ << '\n';
+
+      if(!(remove_dot[dots_vec_[i].getPreyInSightIdx()]) && dots_vec_[i].getPosition() == dots_vec_[dots_vec_[i].getPreyInSightIdx()].getPosition()){
+        std::cout << __LINE__ << '\n';
+
+        dots_vec_[i].eat(500 + 0.3 * dots_vec_[dots_vec_[i].getPreyInSightIdx()].getEnergy());
+        remove_dot[dots_vec_[i].getPreyInSightIdx()] = true;
+      }
+    }
+  }
+  // Remove eaten dot
+  // food_vec_.erase(remove_if(food_vec_.begin(), food_vec_.end(), [& remove_dot](std::pair<uint16_t, uint16_t> &food){
+  //   return remove_dot[];
+  // }), food_vec_.end());
+  for(size_t i = remove_dot.size(); i != 0; --i){
+    if(remove_dot[i - 1]){
+      std::cout << __LINE__ << '\n';
+
+      dots_vec_.erase(dots_vec_.begin() + i - 1);
+    }
+  }
+  std::cout << __LINE__ << '\n';
+  for(size_t i = 0; i < dots_vec_.size(); ++i){
+    dots_vec_[i].setPreyInSight(false);
+  }
+  // Calculate distance for the rest-food
+  // Based on this answer: https://stackoverflow.com/a/59432406/12540220
+  uint16_t grid_size = 50;
+  uint16_t grid_length = testground_size_ / grid_size;
+  // Only save indices of Dots in dots_vec_
+  std::cout << __LINE__ << '\n';
+
+  std::vector<std::vector<std::vector<size_t> > > grid(grid_size, std::vector<std::vector<size_t> > (grid_size));
+  for(size_t i = 0; i < dots_vec_.size(); ++i){
+    std::cout << __LINE__ << '\n';
+
+    const std::pair<uint16_t, uint16_t>& dot_pos = dots_vec_[i].getPosition();
+    const std::pair<uint16_t, uint16_t> grid_pos(dot_pos.first / grid_length, dot_pos.second / grid_length);
+    uint16_t neighborhood = ceil(dots_vec_[i].getSight()/grid_length);
+    std::cout << __LINE__ << '\n';
+
+    for(int16_t x = grid_pos.first - neighborhood; x <= grid_pos.first + neighborhood; ++x){
+      for(int16_t y = grid_pos.second - neighborhood; y <= grid_pos.second + neighborhood; ++y){
+        grid[((x + grid_size) % grid_size)][((y + grid_size) % grid_size)].push_back(i);
+      }
+    }
+  }
+  for(size_t i = 0; i < dots_vec_.size(); ++i){
+    std::cout << __LINE__ << '\n';
+
+    const std::pair<uint16_t, uint16_t>& dot_pos = dots_vec_[i].getPosition();
+    std::pair<uint16_t, uint16_t> grid_pos(dot_pos.first / grid_length, dot_pos.second / grid_length);
+    for(size_t j = 0; j < grid[grid_pos.first][grid_pos.second].size(); ++j){
+      std::cout << __LINE__ << '\n';
+
+      Dot& dot = dots_vec_[grid[grid_pos.first][grid_pos.second][j]];
+      uint16_t dist = distance(dot_pos, dot.getPosition(), testground_size_);
+      if(dist < dot.getSight()){
+        std::cout << __LINE__ << '\n';
+
+        if(dots_vec_[i].getSize() > dot.getSize() * 1.1){
+          std::cout << __LINE__ << '\n';
+
+          dots_vec_[i].newPrey(dot.getPosition(), i, dist);
+          std::cout << __LINE__ << '\n';
+
+        } else if (dots_vec_[i].getSize() * 1.1 < dot.getSize()){
+          std::cout << __LINE__ << '\n';
+
+          dots_vec_[i].newHazardSource(dot.getPosition(), dist);
         }
       }
-      // Tell the Dot about the other Dot
-      if(min_distance == 0){
-        // Let the bigger Dot eat the other Dot. A size difference of at least 10 percent is needed.
-        // The energy gained is a constant value plus a procentual part of the eaten Dots energy.
-        if(dots_vec_[i].getSize() > dots_vec_[min_it - dot_positions.begin()].getSize() * 1.1){
-          dots_vec_[i].eat(500 + 0.3 * dots_vec_[min_it - dot_positions.begin()].getEnergy());
-          dots_vec_.erase((min_it - dot_positions.begin()) + dots_vec_.begin());
-          dot_positions.erase(min_it);
-          --interval_end;
-        } else if(dots_vec_[i].getSize() * 1.1 < dots_vec_[min_it - dot_positions.begin()].getSize()) {
-          dots_vec_[min_it - dot_positions.begin()].eat(500 + 0.3 * dots_vec_[i].getEnergy());
-          dots_vec_.erase(i + dots_vec_.begin());
-          dot_positions.erase(i + dot_positions.begin());
-          break;
-        } else {
-          break;
-        }
-      } else if(min_distance < dots_vec_[i].getSight()){
-        // Fight or Flight? Bigger Dots chase, smaller Dots flee
-        if(dots_vec_[i].getSize() > dots_vec_[min_it - dot_positions.begin()].getSize() * 1.1){
-          dots_vec_[i].newFoodSource(*min_it);
-        } else{
-          dots_vec_[i].newHazardSource(*min_it);
-        }
-      }
-    } while(min_distance == 0);
+    }
   }
 }
+
+//   // sort the Dot-vector controlled by the position of the Dots
+//   sort(dots_vec_.begin(), dots_vec_.end(), [](const Dot& a, const Dot& b){
+//     return a.getPosition() < b.getPosition();
+//   });
+//   // save the position of the Dots alone
+//   vector<pair<uint16_t, uint16_t> > dot_positions(dots_vec_.size());
+//   for (size_t i = 0; i < dots_vec_.size(); ++i) {
+//     dot_positions[i] = dots_vec_[i].getPosition();
+//   }
+//   for (size_t i = 0; i < dot_positions.size(); ++i) {
+//     // Calculate Min. und Max. X-values for each Dot
+//     uint16_t min_x = (dot_positions[i].first - dots_vec_[i].getSight() + testground_size_) % testground_size_;
+//     uint16_t max_x = (dot_positions[i].first + dots_vec_[i].getSight() + testground_size_) % testground_size_;
+//
+//     // Find interval for x values of food_vec_
+//     auto interval_start = find_if(dot_positions.begin(), dot_positions.end(), [& min_x](const pair<uint16_t, uint16_t>& dot) {
+//       return dot.first >= min_x;
+//     });
+//     auto interval_end = find_if(dot_positions.begin(), dot_positions.end(), [& max_x](const pair<uint16_t, uint16_t>& dot) {
+//       return dot.first > max_x;
+//     });
+//     uint16_t min_distance;
+//     do {
+//       // Calculate exact distance for food in interval
+//       auto min_it = interval_end;
+//       min_distance = ~0;
+//       if(interval_end <= interval_start){
+//         // Dots close to the edge can see food sources on the other side of
+//         // the map. This creates some kinda weird interval:
+//         // |-.--->         <--|, so we need 2 for-loops
+//         for (auto j = dot_positions.begin(); j < interval_end; ++j) {
+//           uint16_t dist = distance(dot_positions[i], *j, testground_size_);
+//           if(dist < min_distance){
+//             min_it = j;
+//             min_distance = dist;
+//           }
+//         }
+//         for (auto j = interval_start; j < dot_positions.end(); ++j) {
+//           uint16_t dist = distance(dot_positions[i], *j, testground_size_);
+//           if(dist < min_distance){
+//             min_it = j;
+//             min_distance = dist;
+//           }
+//         }
+//       } else {
+//         // normal case: |  <---.--->       |
+//         for (auto j = interval_start; j < interval_end; ++j) {
+//           uint16_t dist = distance(dot_positions[i], *j, testground_size_);
+//           if(dist < min_distance){
+//             min_it = j;
+//             min_distance = dist;
+//           }
+//         }
+//       }
+//       // Tell the Dot about the other Dot
+//       if(min_distance == 0){
+//         // Let the bigger Dot eat the other Dot. A size difference of at least 10 percent is needed.
+//         // The energy gained is a constant value plus a procentual part of the eaten Dots energy.
+//         if(dots_vec_[i].getSize() > dots_vec_[min_it - dot_positions.begin()].getSize() * 1.1){
+//           dots_vec_[i].eat(500 + 0.3 * dots_vec_[min_it - dot_positions.begin()].getEnergy());
+//           dots_vec_.erase((min_it - dot_positions.begin()) + dots_vec_.begin());
+//           dot_positions.erase(min_it);
+//           --interval_end;
+//         } else if(dots_vec_[i].getSize() * 1.1 < dots_vec_[min_it - dot_positions.begin()].getSize()) {
+//           dots_vec_[min_it - dot_positions.begin()].eat(500 + 0.3 * dots_vec_[i].getEnergy());
+//           dots_vec_.erase(i + dots_vec_.begin());
+//           dot_positions.erase(i + dot_positions.begin());
+//           break;
+//         } else {
+//           break;
+//         }
+//       } else if(min_distance < dots_vec_[i].getSight()){
+//         // Fight or Flight? Bigger Dots chase, smaller Dots flee
+//         if(dots_vec_[i].getSize() > dots_vec_[min_it - dot_positions.begin()].getSize() * 1.1){
+//           dots_vec_[i].newFoodSource(*min_it);
+//         } else{
+//           dots_vec_[i].newHazardSource(*min_it);
+//         }
+//       }
+//     } while(min_distance == 0);
+//   }
+// }
 
 void Environment::printMap(){
   // Scale the the Environment down to 100x100 if testground_size_ is bigger than 100
