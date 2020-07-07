@@ -50,7 +50,8 @@ Dot::Dot(const Dot &d, bool exact_copy /* = true*/):
   energy_(d.energy_),
   reproduction_cooldown_(d.reproduction_cooldown_),
   testground_size_(d.testground_size_),
-  food_in_sight_(false)
+  food_in_sight_(d.food_in_sight_),
+  food_in_sight_pos_(d.food_in_sight_pos_)
 {
 	if(exact_copy){
   	position_ = d.position_;
@@ -61,7 +62,6 @@ Dot::Dot(const Dot &d, bool exact_copy /* = true*/):
 		position_ = make_pair(x, y);
 		direction_ = rand() % 360;
 	}
-  food_in_sight_pos_ = make_pair(0,0);
 }
 
 void Dot::tick(){
