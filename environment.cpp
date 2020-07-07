@@ -82,9 +82,10 @@ void Environment::tick(const int amount /* = 1 */){
     feeding();
     // Trigger Tick of every Dot and let Dots with enough energy replicate
     searchFood();
+    cannibalism();
     for (size_t i = 0; i < dots_vec_.size(); ++i) {
       dots_vec_[i].tick();
-      if(dots_vec_[i].getReproductionCooldown() <= 0 && dots_vec_[i].getEnergy() >= 5000){
+      if(dots_vec_[i].getReproductionCooldown() <= 0 && dots_vec_[i].getEnergy() >= 5000 + 10 * dots_vec_[i].getSize()){
         double mutation_rate = 0.2; // the background_mutationrate is constant at the moment, change here if wanted
         for (size_t i = 0; i < mutagen_vec_.size(); ++i) {
           uint16_t distance_to_mutagen = distance(dots_vec_[i].getPosition(), mutagen_vec_[i], testground_size_);
@@ -107,7 +108,6 @@ void Environment::tick(const int amount /* = 1 */){
   }
 }
 
-// Places new Dots at random locations on the map.
 void Environment::contamination(const int amount){
   for (int i = 0; i < amount; ++i) {
     dots_vec_.push_back(Dot(start_dot_, false)); // "false" prevents copying of postion and direction
@@ -149,6 +149,7 @@ void Environment::searchFood(){
       }
     }
   }
+
   // Remove eaten food
   // food_vec_.erase(remove_if(food_vec_.begin(), food_vec_.end(), [& remove_food](std::pair<uint16_t, uint16_t> &food){
   //   return remove_food[];
@@ -186,6 +187,90 @@ void Environment::searchFood(){
         dot.newFoodSource(food_vec_[i], i, dist);
       }
     }
+  }
+}
+
+void Environment::cannibalism(){
+  // sort the Dot-vector controlled by the position of the Dots
+  sort(dots_vec_.begin(), dots_vec_.end(), [](const Dot& a, const Dot& b){
+    return a.getPosition() < b.getPosition();
+  });
+  // save the position of the Dots alone
+  vector<pair<uint16_t, uint16_t> > dot_positions(dots_vec_.size());
+  for (size_t i = 0; i < dots_vec_.size(); ++i) {
+    dot_positions[i] = dots_vec_[i].getPosition();
+  }
+  for (size_t i = 0; i < dot_positions.size(); ++i) {
+    // Calculate Min. und Max. X-values for each Dot
+    uint16_t min_x = (dot_positions[i].first - dots_vec_[i].getSight() + testground_size_) % testground_size_;
+    uint16_t max_x = (dot_positions[i].first + dots_vec_[i].getSight() + testground_size_) % testground_size_;
+
+    // Find interval for x values of food_vec_
+    auto interval_start = find_if(dot_positions.begin(), dot_positions.end(), [& min_x](const pair<uint16_t, uint16_t>& dot) {
+      return dot.first >= min_x;
+    });
+    auto interval_end = find_if(dot_positions.begin(), dot_positions.end(), [& max_x](const pair<uint16_t, uint16_t>& dot) {
+      return dot.first > max_x;
+    });
+    uint16_t min_distance;
+    do {
+      // Calculate exact distance for food in interval
+      auto min_it = interval_end;
+      min_distance = ~0;
+      if(interval_end <= interval_start){
+        // Dots close to the edge can see food sources on the other side of
+        // the map. This creates some kinda weird interval:
+        // |-.--->         <--|, so we need 2 for-loops
+        for (auto j = dot_positions.begin(); j < interval_end; ++j) {
+          uint16_t dist = distance(dot_positions[i], *j, testground_size_);
+          if(dist < min_distance){
+            min_it = j;
+            min_distance = dist;
+          }
+        }
+        for (auto j = interval_start; j < dot_positions.end(); ++j) {
+          uint16_t dist = distance(dot_positions[i], *j, testground_size_);
+          if(dist < min_distance){
+            min_it = j;
+            min_distance = dist;
+          }
+        }
+      } else {
+        // normal case: |  <---.--->       |
+        for (auto j = interval_start; j < interval_end; ++j) {
+          uint16_t dist = distance(dot_positions[i], *j, testground_size_);
+          if(dist < min_distance){
+            min_it = j;
+            min_distance = dist;
+          }
+        }
+      }
+      // Tell the Dot about the other Dot
+      if(min_distance == 0){
+        // Let the bigger Dot eat the other Dot. A size difference of at least 10 percent is needed.
+        // The energy gained is a constant value plus a procentual part of the eaten Dots energy.
+        if(dots_vec_[i].getSize() > dots_vec_[min_it - dot_positions.begin()].getSize() * 1.1){
+          dots_vec_[i].eat(500 + 0.3 * dots_vec_[min_it - dot_positions.begin()].getEnergy());
+          dots_vec_.erase((min_it - dot_positions.begin()) + dots_vec_.begin());
+          dot_positions.erase(min_it);
+          --interval_end;
+        } else if(dots_vec_[i].getSize() * 1.1 < dots_vec_[min_it - dot_positions.begin()].getSize()) {
+          dots_vec_[min_it - dot_positions.begin()].eat(500 + 0.3 * dots_vec_[i].getEnergy());
+          dots_vec_.erase(i + dots_vec_.begin());
+          dot_positions.erase(i + dot_positions.begin());
+          break;
+        } else {
+          break;
+        }
+      } else if(min_distance < dots_vec_[i].getSight()){
+        // Fight or Flight? Bigger Dots chase, smaller Dots flee
+        if(dots_vec_[i].getSize() > dots_vec_[min_it - dot_positions.begin()].getSize() * 1.1){
+          dots_vec_[i].newFoodSource(*min_it);
+        } else{
+          dots_vec_[i].newHazardSource(*min_it);
+        }
+      }
+    } while(min_distance == 0);
   }
 }
 
@@ -242,6 +327,10 @@ void Environment::printProperties(){
     uint16_t min_sight = ~0;
     uint16_t max_sight = 0;
 
+    std::vector<uint16_t> size_count_vec;
+    uint16_t min_size = ~0;
+    uint16_t max_size = 0;
+
     int min_energy = ~(1 << 31);
     int max_energy = 0;
     int64_t sum_energy = 0;
@@ -250,6 +339,7 @@ void Environment::printProperties(){
       // Get() properties once and save them
       uint16_t dot_speed = dots_vec_[i].getSpeed();
       uint16_t dot_sight = dots_vec_[i].getSight();
+      uint16_t dot_size = dots_vec_[i].getSize();
       int dot_energy = dots_vec_[i].getEnergy();
 
       // Count occurences of specific values
@@ -257,18 +347,30 @@ void Environment::printProperties(){
         speed_count_vec.resize(dot_speed);
       }
       ++speed_count_vec[dot_speed - 1];
+
       if(dot_sight > sight_count_vec.size()){
         sight_count_vec.resize(dot_sight);
       }
       ++sight_count_vec[dot_sight - 1];
 
+      if(dot_size > size_count_vec.size()){
+        size_count_vec.resize(dot_size);
+      }
+      ++size_count_vec[dot_size - 1];
+
       // Compare to current minimum
       if(dot_speed < min_speed){
         min_speed = dot_speed;
       }
+
       if(dot_sight < min_sight){
         min_sight = dot_sight;
       }
+
+      if(dot_size < min_size){
+        min_size = dot_size;
+      }
+
       if(dot_energy < min_energy){
         min_energy = dot_energy;
       }
@@ -277,9 +379,15 @@ void Environment::printProperties(){
       if(dot_speed > max_speed){
         max_speed = dot_speed;
       }
+
       if(dot_sight > max_sight){
         max_sight = dot_sight;
       }
+
+      if(dot_size > max_size){
+        max_size = dot_size;
+      }
+
       if(dot_energy > max_energy){
         max_energy = dot_energy;
       }
@@ -287,36 +395,32 @@ void Environment::printProperties(){
       // Add to sum, needed for average
       sum_energy += dot_energy;
     }
-    uint32_t sum_sight = 0;
-    for (size_t i = 1; i <= sight_count_vec.size(); ++i) {
-      sum_sight += sight_count_vec[i-1]*(i);
-    }
     uint32_t sum_speed = 0;
     for (size_t i = 1; i <= speed_count_vec.size(); ++i) {
       sum_speed += speed_count_vec[i-1]*(i);
     }
+
+    uint32_t sum_sight = 0;
+    for (size_t i = 1; i <= sight_count_vec.size(); ++i) {
+      sum_sight += sight_count_vec[i-1]*(i);
+    }
+
+    uint32_t sum_size = 0;
+    for (size_t i = 1; i <= size_count_vec.size(); ++i) {
+      sum_size += size_count_vec[i-1]*(i);
+    }
+
     cout << "\n--- Werte von " << dots_vec_.size() << " Dots in Tick " << tick_ << " ---\n";
     cout << "        | MIN | MAX | AVG |\n";
-    cout << "SIGHT:  |" << niceNumberPrint(min_sight, 5) << "|" << niceNumberPrint(max_sight, 5) << "|" << niceNumberPrint((float)sum_sight / dots_vec_.size(), 5) << "|\n";
     cout << "SPEED:  |" << niceNumberPrint(min_speed, 5) << "|" << niceNumberPrint(max_speed, 5) << "|" << niceNumberPrint((float)sum_speed / dots_vec_.size(), 5) << "|\n";
+    cout << "SIGHT:  |" << niceNumberPrint(min_sight, 5) << "|" << niceNumberPrint(max_sight, 5) << "|" << niceNumberPrint((float)sum_sight / dots_vec_.size(), 5) << "|\n";
+    cout << "SIZE:   |" << niceNumberPrint(min_size, 5) << "|" << niceNumberPrint(max_size, 5) << "|" << niceNumberPrint((float)sum_size / dots_vec_.size(), 5) << "|\n";
     cout << "ENERGY: |" << niceNumberPrint(min_energy, 5) << "|" << niceNumberPrint(max_energy, 5) << "|" << niceNumberPrint((float)sum_energy / dots_vec_.size(), 5) << "|\n";
 
     // Output of count-vectors
-    cout << "Genaue Sightwerte:";
+    cout << "\nGenaue Speedwerte:";
     std::string line1 = "\nWert:   |";
     std::string line2 = "\nAnzahl: |";
-    for (size_t i = min_sight; i <= sight_count_vec.size(); ++i) {
-      if (sight_count_vec[i-1] != 0){
-        line1 += niceNumberPrint(i, 3);
-        line2 += niceNumberPrint(sight_count_vec[i-1], 3);
-      }
-      line1 += "|";
-      line2 += "|";
-    }
-    cout << line1 << line2;
-    cout << "\nGenaue Speedwerte:";
-    line1 = "\nWert:   |";
-    line2 = "\nAnzahl: |";
     for (size_t i = min_speed; i <= speed_count_vec.size(); ++i) {
       if (speed_count_vec[i-1] != 0){
         line1 += niceNumberPrint(i, 3);
@@ -326,14 +430,37 @@ void Environment::printProperties(){
       line2 += "|";
     }
     cout << line1 << line2;
-
+    cout << "\nGenaue Sightwerte:";
+    line1 = "\nWert:   |";
+    line2 = "\nAnzahl: |";
+    for (size_t i = min_sight; i <= sight_count_vec.size(); ++i) {
+      if (sight_count_vec[i-1] != 0){
+        line1 += niceNumberPrint(i, 3);
+        line2 += niceNumberPrint(sight_count_vec[i-1], 3);
+      }
+      line1 += "|";
+      line2 += "|";
+    }
+    cout << line1 << line2;
+    cout << "\nGenaue Sizewerte:";
+    line1 = "\nWert:   |";
+    line2 = "\nAnzahl: |";
+    for (size_t i = min_size; i <= size_count_vec.size(); ++i) {
+      if (size_count_vec[i-1] != 0){
+        line1 += niceNumberPrint(i, 3);
+        line2 += niceNumberPrint(size_count_vec[i-1], 3);
+      }
+      line1 += "|";
+      line2 += "|";
+    }
+    cout << line1 << line2;
     cout << "\nIm aktuellen Tick sind " << food_vec_.size() << " Futterstuecke auf dem Feld\n";
     if(debug || debug_env){
       int f = food_vec_.size();
       int dots = dots_vec_.size();
       int sum = 2 * f * log(f) + 2 * dots * (log(f) + log(f / 2) + pow(f * (sum_sight / dots) / testground_size_,2) + 2 * f * pow((sum_sight / dots) / testground_size_, 2));
       int sum2 = f * log(f) + dots * (log(f) + log(f / 2) + 2 * f * (sum_sight / dots) / testground_size_);
-      cout << "Laufzeitanalyse Futtersuche (geschätzte Werte):\nNaiver Ansatz: " << f * dots << "\nSchnitt aus Intervallen aus sortierten Listen: " << sum << "\nIntervall einer sortierten Liste:  " << sum2 << "\n";
+      cout << "Laufzeitanalyse Futtersuche (geschätzte Werte):\nSchnitt aus Intervallen aus sortierten Listen: " << sum << "\nIntervall einer sortierten Liste:  " << sum2 << "\n";
     }
   } else {
     cout << "Im Tick " << tick_ << " sind keine Dots mehr am Leben.\n";
