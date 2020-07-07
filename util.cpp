@@ -5,6 +5,10 @@
 
 using namespace std;
 
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 extern bool debug; // "extern" tells the compiler that debug is already declared somewhere else (environment.cpp)
 bool debug_util = false;
 
@@ -61,23 +65,12 @@ int signum(float val) {
 // }
 
 std::string niceNumberPrint(const uint16_t number, uint8_t length){
-  uint8_t front_spaces = 0, back_spaces = 0;
-  std::string number_string = to_string(number);
-  while(front_spaces + back_spaces + number_string.length() < length){
-    if(front_spaces == back_spaces){
-      ++front_spaces;
-    } else {
-      ++back_spaces;
-    }
-  }
-  std::string out_string = "";
-  for (uint8_t i = 0; i < front_spaces; ++i) {
-    out_string += " ";
-  }
-  out_string += number_string;
-  for (uint8_t i = 0; i < back_spaces; ++i) {
-    out_string += " ";
-  }
+  uint8_t string_length = to_string(number).length();
+  uint8_t front_spaces = (length - string_length + 1) / 2;
+  uint8_t back_spaces = (length - string_length) / 2;
+  string out_string(front_spaces, ' ');
+  out_string += to_string(number);
+  out_string.append(back_spaces, ' ');
   return out_string;
 }
 //   2    3      4       5    ...

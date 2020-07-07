@@ -11,14 +11,14 @@ using namespace std;
 //   Dot d(1000, 10000, 10, 20, 100, make_pair(0,0));
 //   Environment e(1000, 10, 100, 100, d);
 //   Environment e2(1000, 10, 100, 100, d);
-  // e.printProperties();
-//   e2.printProperties();
+//   // e.printProperties();
+//   // e2.printProperties();
 //   e.placeMutagen(100);
 //   for (size_t i = 0; i < 10; ++i) {
 //     e.tick(100);
-//     e.printProperties();
 //     e2.tick(100);
-//     e2.printProperties();
+//     // e.printProperties();
+//     // e2.printProperties();
 //   }
 //   e.printMap();
 //   e2.printMap();
@@ -39,6 +39,7 @@ int main(int argc, char const *argv[]) {
   for (int i = 0; i < stoi(argv[1])/ticks_at_once; ++i) {
     e.tick(ticks_at_once);
     e.printProperties();
+    // e.printMap();
   }
   return 0;
 }

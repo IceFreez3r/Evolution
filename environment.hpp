@@ -33,7 +33,9 @@ public:
   void feeding();
   // Prints the Positions of Dots and food scaled to a 100x100 matrix
   void printMap();
+  // Prints the properties of the Testground
   void printTestground();
+  // Prints a summary of the properties of all Dpts.
   void printProperties();
 private:
   // "Tells" a Dot if it can see food
