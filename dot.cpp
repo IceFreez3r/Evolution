@@ -51,6 +51,7 @@ Dot::Dot(const Dot &d, bool exact_copy /* = true*/):
   reproduction_cooldown_(d.reproduction_cooldown_),
   testground_size_(d.testground_size_),
   food_in_sight_(d.food_in_sight_),
+  food_in_sight_idx_(d.food_in_sight_idx_),
   food_in_sight_pos_(d.food_in_sight_pos_)
 {
 	if(exact_copy){
@@ -66,10 +67,9 @@ Dot::Dot(const Dot &d, bool exact_copy /* = true*/):
 
 void Dot::tick(){
   if (food_in_sight_) {
-    uint16_t dist = distance(position_,food_in_sight_pos_, testground_size_);
-    if(dist < speed_){
+    if(food_in_sight_dist_ < speed_){
       position_ = food_in_sight_pos_;
-      energy_ -= dist * speed_;
+      energy_ -= food_in_sight_dist_ * speed_;
     } else {
       direction_ = direction(position_, food_in_sight_pos_, testground_size_);
       position_ = move(position_, direction_, speed_, testground_size_);
@@ -98,45 +98,60 @@ Dot Dot::replicate(const double mutation_rate){
   return child;
 }
 
-void Dot::newFoodSource(pair<uint16_t, uint16_t> food_pos){
-  food_in_sight_ = true;
-  food_in_sight_pos_ = food_pos;
+void Dot::newFoodSource(pair<uint16_t, uint16_t> food_pos, size_t idx, uint16_t dist){
+  if(!food_in_sight_ || dist < food_in_sight_dist_){
+    food_in_sight_ = true;
+    food_in_sight_pos_ = food_pos;
+    food_in_sight_idx_ = idx;
+    food_in_sight_dist_ = dist;
+  }
 }
 
 void Dot::eat(int amount){
   energy_ += amount;
-  food_in_sight_ = false;
 }
 
 // Get()- and Set()-Functions
-int Dot::getEnergy(){
+int Dot::getEnergy() const{
   return energy_;
 }
 
-pair<uint16_t, uint16_t> Dot::getPosition(){
+pair<uint16_t, uint16_t> Dot::getPosition() const{
   return position_;
 }
 
-int Dot::getReproductionCooldown(){
+int Dot::getReproductionCooldown() const{
   return reproduction_cooldown_;
 }
 
-uint16_t Dot::getSpeed(){
+uint16_t Dot::getSpeed() const{
   return speed_;
 }
 
-uint16_t Dot::getSight(){
+uint16_t Dot::getSight() const{
   return sight_;
 }
 
-uint16_t Dot::getSize(){
+uint16_t Dot::getSize() const{
   return size_;
 }
 
-uint16_t Dot::getTestgroundSize(){
+uint16_t Dot::getTestgroundSize() const{
   return testground_size_;
 }
 
 void Dot::setTestgroundSize(uint16_t testground_size){
   testground_size_ = testground_size;
+}
+
+bool Dot::getFoodInSight() const{
+  return food_in_sight_;
+}
+
+void Dot::setFoodInSight(bool food){
+  food_in_sight_ = food;
+}
+
+std::size_t Dot::getFoodInSightIdx() const{
+  return food_in_sight_idx_;
 }

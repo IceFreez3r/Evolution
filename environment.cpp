@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <stdlib.h>
 #include <time.h>
-#include <math.h>
+#include <math.h> //ceil
 
 #include "environment.hpp"
 
@@ -139,66 +139,53 @@ void Environment::feeding(){
 }
 
 void Environment::searchFood(){
-  sort(food_vec_.begin(), food_vec_.end());
-  if (debug || debug_env) {
-    for (size_t i = 0; i < food_vec_.size(); ++i) {
-      cout << "(" << food_vec_[i].first << "," << food_vec_[i].first << ")\n";
+  // Remove food exactly below Dots first
+  std::vector<bool> remove_food(food_vec_.size(), false);
+  for (size_t i = 0; i < dots_vec_.size(); ++i) {
+    if(dots_vec_[i].getFoodInSight()){
+      if(!(remove_food[dots_vec_[i].getFoodInSightIdx()]) && dots_vec_[i].getPosition() == food_vec_[dots_vec_[i].getFoodInSightIdx()]){
+        dots_vec_[i].eat(1000);
+        remove_food[dots_vec_[i].getFoodInSightIdx()] = true;
+      }
     }
   }
-  for (size_t i = 0; i < dots_vec_.size(); ++i) {
-    // Calculate Min. und Max. X-values for each Dot
-    uint16_t min_x = (dots_vec_[i].getPosition().first - dots_vec_[i].getSight() + testground_size_) % testground_size_;
-    uint16_t max_x = (dots_vec_[i].getPosition().first + dots_vec_[i].getSight() + testground_size_) % testground_size_;
-
-    // Find interval for x values of food_vec_
-    auto interval_start = find_if(food_vec_.begin(), food_vec_.end(), [&min_x](const pair<uint16_t, uint16_t>& food) {
-      return food.first >= min_x;
-    });
-    auto interval_end = find_if(food_vec_.begin(), food_vec_.end(), [&max_x](const pair<uint16_t, uint16_t>& food) {
-      return food.first > max_x;
-    });
-    uint16_t min_distance;
-    do {
-      // Calculate exact distance for food in interval
-      auto min_it = interval_end;
-      min_distance = ~0;
-      if(interval_end <= interval_start){
-        // Dots close to the edge can see food sources on the other side of
-        // the map. This creates some kinda weird interval:
-        // |-.--->         <--|, so we need 2 for-loops
-        for (auto j = food_vec_.begin(); j < interval_end; ++j) {
-          uint16_t dist = distance(dots_vec_[i].getPosition(), food_vec_[j - food_vec_.begin()], testground_size_);
-          if(dist < min_distance){
-            min_it = j;
-            min_distance = dist;
-          }
-        }
-        for (auto j = interval_start; j < food_vec_.end(); ++j) {
-          uint16_t dist = distance(dots_vec_[i].getPosition(), food_vec_[j - food_vec_.begin()], testground_size_);
-          if(dist < min_distance){
-            min_it = j;
-            min_distance = dist;
-          }
-        }
-      } else {
-        // normal case: |  <---.--->       |
-        for (auto j = interval_start; j < interval_end; ++j) {
-          uint16_t dist = distance(dots_vec_[i].getPosition(), food_vec_[j - food_vec_.begin()], testground_size_);
-          if(dist < min_distance){
-            min_it = j;
-            min_distance = dist;
-          }
-        }
+  // Remove eaten food
+  // food_vec_.erase(remove_if(food_vec_.begin(), food_vec_.end(), [& remove_food](std::pair<uint16_t, uint16_t> &food){
+  //   return remove_food[];
+  // }), food_vec_.end());
+  for(size_t i = remove_food.size(); i != 0; --i){
+    if(remove_food[i - 1]){
+      food_vec_.erase(food_vec_.begin() + i - 1);
+    }
+  }
+  for(size_t i = 0; i < dots_vec_.size(); ++i){
+    dots_vec_[i].setFoodInSight(false);
+  }
+  // Calculate distance for the rest-food
+  // Based on this answer: https://stackoverflow.com/a/59432406/12540220
+  uint16_t grid_size = 50;
+  uint16_t grid_length = testground_size_ / grid_size;
+  // Only save indices of Dots in dots_vec_
+  std::vector<std::vector<std::vector<size_t> > > grid(grid_size, std::vector<std::vector<size_t> > (grid_size));
+  for(size_t i = 0; i < dots_vec_.size(); ++i){
+    const std::pair<uint16_t, uint16_t>& dot_pos = dots_vec_[i].getPosition();
+    const std::pair<uint16_t, uint16_t> grid_pos(dot_pos.first / grid_length, dot_pos.second / grid_length);
+    uint16_t neighborhood = ceil(dots_vec_[i].getSight()/grid_length);
+    for(int16_t x = grid_pos.first - neighborhood; x <= grid_pos.first + neighborhood; ++x){
+      for(int16_t y = grid_pos.second - neighborhood; y <= grid_pos.second + neighborhood; ++y){
+        grid[((x + grid_size) % grid_size)][((y + grid_size) % grid_size)].push_back(i);
       }
-      // Tell the Dot about the Food
-      if(min_distance == 0){
-        dots_vec_[i].eat(1000);
-        food_vec_.erase(min_it);
-        --interval_end;
-      } else if(min_distance < dots_vec_[i].getSight()){
-        dots_vec_[i].newFoodSource(food_vec_[min_it - food_vec_.begin()]);
+    }
+  }
+  for(size_t i = 0; i < food_vec_.size(); ++i){
+    std::pair<uint16_t, uint16_t> grid_pos(food_vec_[i].first / grid_length, food_vec_[i].second / grid_length);
+    for(size_t j = 0; j < grid[grid_pos.first][grid_pos.second].size(); ++j){
+      Dot& dot = dots_vec_[grid[grid_pos.first][grid_pos.second][j]];
+      uint16_t dist = distance(food_vec_[i], dot.getPosition(), testground_size_);
+      if(dist < dot.getSight()){
+        dot.newFoodSource(food_vec_[i], i, dist);
       }
-    } while(min_distance == 0);
+    }
   }
 }
 
@@ -236,7 +223,7 @@ void Environment::printMap(){
         cout << " ";
       }
     }
-    cout << "\n";
+    cout << "|\n";
   }
   cout << "Legende: ' ' Nichts, '!' Mutagen, '.' Dot, 'x' Essen, '%' Dot und Essen\nBei mehreren Objekten auf demselben Punkt wird nur eins angezeigt\nDie Ausgabe ist skaliert auf " << scale << "x" << scale << "\n";
 }
