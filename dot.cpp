@@ -51,6 +51,7 @@ Dot::Dot(const Dot &d, bool exact_copy /* = true*/):
   reproduction_cooldown_(d.reproduction_cooldown_),
   testground_size_(d.testground_size_),
   food_in_sight_(d.food_in_sight_),
+  food_in_sight_idx_(d.food_in_sight_idx_),
   food_in_sight_pos_(d.food_in_sight_pos_)
 {
 	if(exact_copy){
