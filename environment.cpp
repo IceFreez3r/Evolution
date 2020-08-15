@@ -82,7 +82,9 @@ void Environment::tick(const int amount /* = 1 */){
     feeding();
     // Trigger Tick of every Dot and let Dots with enough energy replicate
     searchFood();
+    std::cout << __LINE__ << '\n';
     cannibalism();
+    std::cout << __LINE__ << '\n';
     for (size_t i = 0; i < dots_vec_.size(); ++i) {
       dots_vec_[i].tick();
       if(dots_vec_[i].getReproductionCooldown() <= 0 && dots_vec_[i].getEnergy() >= 5000 + 10 * dots_vec_[i].getSize()){
@@ -94,6 +96,7 @@ void Environment::tick(const int amount /* = 1 */){
         dots_vec_.push_back(dots_vec_[i].replicate(mutation_rate));
       }
     }
+    std::cout << __LINE__ << '\n';
     // Delete Dot with 0 energy or less
     dots_vec_.erase(remove_if(dots_vec_.begin(), dots_vec_.end(), [](Dot &d){
       return d.getEnergy() <= 0;
@@ -191,84 +194,60 @@ void Environment::searchFood(){
 }
 
 void Environment::cannibalism(){
+  std::cout << __LINE__ << '\n';
   // Remove food exactly below Dots first
   std::vector<bool> remove_dot(dots_vec_.size(), false);
-  std::cout << __LINE__ << '\n';
-
   for (size_t i = 0; i < dots_vec_.size(); ++i) {
     if(dots_vec_[i].getPreyInSight()){
-      std::cout << __LINE__ << '\n';
-
       if(!(remove_dot[dots_vec_[i].getPreyInSightIdx()]) && dots_vec_[i].getPosition() == dots_vec_[dots_vec_[i].getPreyInSightIdx()].getPosition()){
-        std::cout << __LINE__ << '\n';
-
         dots_vec_[i].eat(500 + 0.3 * dots_vec_[dots_vec_[i].getPreyInSightIdx()].getEnergy());
         remove_dot[dots_vec_[i].getPreyInSightIdx()] = true;
       }
     }
   }
-  // Remove eaten dot
-  // food_vec_.erase(remove_if(food_vec_.begin(), food_vec_.end(), [& remove_dot](std::pair<uint16_t, uint16_t> &food){
+  std::cout << __LINE__ << '\n';
+  // Remove eaten dots
+  // dots_vec_.erase(remove_if(dots_vec_.begin(), dots_vec_.end(), [& remove_dot](std::pair<uint16_t, uint16_t> &dot){
   //   return remove_dot[];
-  // }), food_vec_.end());
+  // }), dots_vec_.end());
   for(size_t i = remove_dot.size(); i != 0; --i){
     if(remove_dot[i - 1]){
-      std::cout << __LINE__ << '\n';
-
       dots_vec_.erase(dots_vec_.begin() + i - 1);
     }
   }
-  std::cout << __LINE__ << '\n';
   for(size_t i = 0; i < dots_vec_.size(); ++i){
     dots_vec_[i].setPreyInSight(false);
   }
+  std::cout << __LINE__ << '\n';
   // Calculate distance for the rest-food
   // Based on this answer: https://stackoverflow.com/a/59432406/12540220
   uint16_t grid_size = 50;
   uint16_t grid_length = testground_size_ / grid_size;
   // Only save indices of Dots in dots_vec_
-  std::cout << __LINE__ << '\n';
-
   std::vector<std::vector<std::vector<size_t> > > grid(grid_size, std::vector<std::vector<size_t> > (grid_size));
   for(size_t i = 0; i < dots_vec_.size(); ++i){
-    std::cout << __LINE__ << '\n';
-
     const std::pair<uint16_t, uint16_t>& dot_pos = dots_vec_[i].getPosition();
     const std::pair<uint16_t, uint16_t> grid_pos(dot_pos.first / grid_length, dot_pos.second / grid_length);
     uint16_t neighborhood = ceil(dots_vec_[i].getSight()/grid_length);
-    std::cout << __LINE__ << '\n';
-
     for(int16_t x = grid_pos.first - neighborhood; x <= grid_pos.first + neighborhood; ++x){
       for(int16_t y = grid_pos.second - neighborhood; y <= grid_pos.second + neighborhood; ++y){
         grid[((x + grid_size) % grid_size)][((y + grid_size) % grid_size)].push_back(i);
       }
     }
   }
+  std::cout << __LINE__ << '\n';
   for(size_t i = 0; i < dots_vec_.size(); ++i){
-    std::cout << __LINE__ << '\n';
-
     const std::pair<uint16_t, uint16_t>& dot_pos = dots_vec_[i].getPosition();
     std::pair<uint16_t, uint16_t> grid_pos(dot_pos.first / grid_length, dot_pos.second / grid_length);
     for(size_t j = 0; j < grid[grid_pos.first][grid_pos.second].size(); ++j){
-      std::cout << __LINE__ << '\n';
-
       Dot& dot = dots_vec_[grid[grid_pos.first][grid_pos.second][j]];
       uint16_t dist = distance(dot_pos, dot.getPosition(), testground_size_);
       if(dist < dot.getSight()){
-        std::cout << __LINE__ << '\n';
-
         if(dots_vec_[i].getSize() > dot.getSize() * 1.1){
-          std::cout << __LINE__ << '\n';
-
           dots_vec_[i].newPrey(dot.getPosition(), i, dist);
-          std::cout << __LINE__ << '\n';
-
         } else if (dots_vec_[i].getSize() * 1.1 < dot.getSize()){
-          std::cout << __LINE__ << '\n';
-
           dots_vec_[i].newHazardSource(dot.getPosition(), dist);
         }
-        std::cout << __LINE__ << '\n';
       }
     }
   }
