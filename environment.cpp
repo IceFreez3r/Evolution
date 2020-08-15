@@ -192,7 +192,7 @@ void Environment::searchFood(){
 
 void Environment::cannibalism(){
   // Remove food exactly below Dots first
-  std::vector<bool> remove_dot(food_vec_.size(), false);
+  std::vector<bool> remove_dot(dots_vec_.size(), false);
   std::cout << __LINE__ << '\n';
 
   for (size_t i = 0; i < dots_vec_.size(); ++i) {
@@ -268,9 +268,11 @@ void Environment::cannibalism(){
 
           dots_vec_[i].newHazardSource(dot.getPosition(), dist);
         }
+        std::cout << __LINE__ << '\n';
       }
     }
   }
+  std::cout << __LINE__ << '\n';
 }
 
 //   // sort the Dot-vector controlled by the position of the Dots
