@@ -78,8 +78,10 @@ void Environment::clearMutagen(){
 
 void Environment::tick(const int amount /* = 1 */){
   for (int i = 0; i < amount; ++i) {
+    std::cerr << __LINE__ << '\n';
     // Generate new Food
     feeding();
+    std::cerr << __LINE__ << '\n';
     // Trigger Tick of every Dot and let Dots with enough energy replicate
     searchFood();
     std::cerr << __LINE__ << '\n';
