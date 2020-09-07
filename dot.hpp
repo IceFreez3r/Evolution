@@ -25,7 +25,7 @@ public:
   // updates food_in_sight_, food_in_sight_idx_, food_in_sight_pos_, food_in_sight_dist_
   void newFoodSource(std::pair<uint16_t, uint16_t> food_pos, std::size_t idx, uint16_t dist);
 
-  // Gets triggered by environment if a prey in sight
+  // Gets triggered by environment if a prey is in sight
   // updates prey_in_sight_, prey_in_sight_idx_, prey_in_sight_pos_, prey_in_sight_dist_
   void newPrey(std::pair<uint16_t, uint16_t> prey_pos, std::size_t idx, uint16_t dist);
 

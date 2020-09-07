@@ -83,7 +83,7 @@ void Dot::tick(){
     if (distance(position_, hazard_in_sight_pos_, testground_size_) > sight_ * 2){
       hazard_in_sight_ = false;
     } else {
-      direction_ = (direction(position_, food_in_sight_pos_, testground_size_) + 180) % 360;
+      direction_ = (direction(position_, hazard_in_sight_pos_, testground_size_) + 180) % 360;
       position_ = move(position_, direction_, speed_, testground_size_);
       energy_ -= pow(speed_, 2);
     }
@@ -103,7 +103,7 @@ void Dot::tick(){
       }
     }
     // Third priority is to move to food
-    if (food_in_sight_) {
+    if (food_in_sight_){
       if(food_in_sight_dist_ < speed_){
         position_ = food_in_sight_pos_;
         energy_ -= food_in_sight_dist_ * speed_;
@@ -120,11 +120,11 @@ void Dot::tick(){
     }
   }
   // Substract basic consumption
-  energy_ -= sight_ + size_;
+  energy_ -= sight_;
+  energy_ -= size_;
   // Reduce reproduction cooldown
   --reproduction_cooldown_;
 }
-
 
 Dot Dot::replicate(const double mutation_rate){
   uint16_t speed_change = max(1.0, (double)speed_ * mutation_rate);
@@ -195,7 +195,6 @@ uint16_t Dot::getSize() const{
 }
 
 uint16_t Dot::getTestgroundSize() const{
-
   return testground_size_;
 }
 
