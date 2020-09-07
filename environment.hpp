@@ -21,7 +21,7 @@ public:
   void clearMutagen();
   // Triggers tick() function of every Dot and runs feeding(...), if amount is given the function is repeated multiple times
   void tick(const int amount = 1);
-  // Places new Dots on the Testground with standard properties
+  // Places copies of the start_dot on the Testground
   void contamination(const int amount);
   // Changes the amount of food generated in each tick
   void changeFoodPerTick(const int min_amount, const int max_amount);
@@ -40,6 +40,7 @@ public:
 private:
   // "Tells" a Dot if it can see food
   void searchFood();
+  void cannibalism();
   const std::uint16_t testground_size_; // Size of the Testground
   std::vector<std::pair<std::uint16_t, std::uint16_t> > food_vec_; //Positions of Food
   int min_food_per_tick_;
@@ -48,4 +49,5 @@ private:
   std::vector<Dot> dots_vec_; //Vector of all Dots
   uint32_t tick_;
   std::vector<std::pair<std::uint16_t, std::uint16_t> >  mutagen_vec_; //Positions of Mutagen
+  std::vector<bool> alive_vec_; //status of dot; alive (true), dead (false)
 };

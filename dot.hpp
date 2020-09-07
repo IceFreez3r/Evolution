@@ -21,9 +21,17 @@ public:
   // maximum change is dependent on the old value multiplied with the mutation_rate
   Dot replicate(const double mutation_rate);
 
-  // Gets triggered by environment if a food might be in sight
+  // Gets triggered by environment if a food is in sight
   // updates food_in_sight_, food_in_sight_idx_, food_in_sight_pos_, food_in_sight_dist_
   void newFoodSource(std::pair<uint16_t, uint16_t> food_pos, std::size_t idx, uint16_t dist);
+
+  // Gets triggered by environment if a prey is in sight
+  // updates prey_in_sight_, prey_in_sight_idx_, prey_in_sight_pos_, prey_in_sight_dist_
+  void newPrey(std::pair<uint16_t, uint16_t> prey_pos, std::size_t idx, uint16_t dist);
+
+  //Gets triggered by environment if a bigger enemy is in sight
+  void newHazardSource(std::pair<uint16_t, uint16_t> hazard_pos, uint16_t dist);
+
   // Gets triggered by the environment if the dot reaches a food source
   void eat(int amount);
 
@@ -39,6 +47,10 @@ public:
   bool getFoodInSight() const;
   void setFoodInSight(bool food_in_sight);
   std::size_t getFoodInSightIdx() const;
+  bool getPreyInSight() const;
+  void setPreyInSight(bool prey_in_sight);
+  std::size_t getPreyInSightIdx() const;
+  void setPreyInSightIdx(std::size_t idx);
 
 private:
   // Constant properties
@@ -50,10 +62,21 @@ private:
   int energy_; // energy the dot, the dot dies when it reaches 0
   int reproduction_cooldown_; // time until the dot can replicate again
   uint16_t testground_size_;
+
   bool food_in_sight_; // True, if a food source is in sight
   std::size_t food_in_sight_idx_; // index of the food source in sight
   std::pair<std::uint16_t, std::uint16_t> food_in_sight_pos_; // position of the food source in sight
-  uint16_t food_in_sight_dist_;
+  uint16_t food_in_sight_dist_; // Distance to food source
+
+  bool prey_in_sight_; // True, if a dot prey is in sight
+  std::size_t prey_in_sight_idx_; // index of the dot prey in sight
+  std::pair<std::uint16_t, std::uint16_t> prey_in_sight_pos_; // position of the dot prey in sight
+  uint16_t prey_in_sight_dist_; // Distance to dot prey
+
+  bool hazard_in_sight_; // True, if a food source is in sight
+  std::pair<uint16_t, uint16_t> hazard_in_sight_pos_; // position of the hazard source in sight
+  uint16_t hazard_in_sight_dist_; // position of the hazard source in sight
+
   std::pair<uint16_t, uint16_t> position_; // position on the Testground
   int16_t direction_; // direction of movement, (0 right, 90 up, 180 left, -90 down)
 };
