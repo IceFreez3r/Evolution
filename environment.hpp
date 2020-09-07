@@ -49,4 +49,5 @@ private:
   std::vector<Dot> dots_vec_; //Vector of all Dots
   uint32_t tick_;
   std::vector<std::pair<std::uint16_t, std::uint16_t> >  mutagen_vec_; //Positions of Mutagen
+  std::vector<bool> alive_vec_; //status of dot; alive (true), dead (false)
 };

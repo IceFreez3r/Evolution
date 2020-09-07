@@ -78,16 +78,21 @@ void Environment::clearMutagen(){
 
 void Environment::tick(const int amount /* = 1 */){
   for (int i = 0; i < amount; ++i) {
-    std::cerr << __LINE__ << '\n';
+    // Dots with energy <= 0 die
+    for(size_t i = 0; i < dots_vec_.size(); ++i){
+      if(dots_vec_[i].getEnergy() <= 0){
+        alive_vec_[i] = false;
+      }
+    }
     // Generate new Food
     feeding();
-    std::cerr << __LINE__ << '\n';
     // Trigger Tick of every Dot and let Dots with enough energy replicate
     searchFood();
-    std::cerr << __LINE__ << '\n';
     cannibalism();
-    std::cerr << __LINE__ << '\n' << std::flush;
     for (size_t i = 0; i < dots_vec_.size(); ++i) {
+      if(!alive_vec_[i]){
+        continue;
+      }
       dots_vec_[i].tick();
       if(dots_vec_[i].getReproductionCooldown() <= 0 && dots_vec_[i].getEnergy() >= 5000 + 10 * dots_vec_[i].getSize()){
         double mutation_rate = 0.2; // the background_mutationrate is constant at the moment, change here if wanted
@@ -96,13 +101,29 @@ void Environment::tick(const int amount /* = 1 */){
           mutation_rate += 1/(distance_to_mutagen * distance_to_mutagen + 1);
         }
         dots_vec_.push_back(dots_vec_[i].replicate(mutation_rate));
+        alive_vec_.push_back(true);
       }
     }
-    std::cerr << __LINE__ << '\n';
-    // Delete Dot with 0 energy or less
-    dots_vec_.erase(remove_if(dots_vec_.begin(), dots_vec_.end(), [](Dot &d){
-      return d.getEnergy() <= 0;
-    }), dots_vec_.end());
+    // dots_vec_.erase(remove_if(dots_vec_.begin(), dots_vec_.end(), [](Dot &d){
+    //   return !(d.getAlive());
+    // }), dots_vec_.end());
+    // Reduce Indices of Preys
+    for(size_t i = 0; i < dots_vec_.size(); ++i){
+      if (dots_vec_[i].getPreyInSight()) {
+        if(alive_vec_[dots_vec_[i].getPreyInSightIdx()]){
+          dots_vec_[i].setPreyInSightIdx(dots_vec_[i].getPreyInSightIdx() - std::count(alive_vec_.begin(), alive_vec_.begin() + dots_vec_[i].getPreyInSightIdx(), false));
+        } else {
+          dots_vec_[i].setPreyInSight(false);
+        }
+      }
+    }
+    // Delete dead Dots
+    for(size_t i = alive_vec_.size(); i != 0; --i){
+      if(!alive_vec_[i - 1]){
+        dots_vec_.erase(dots_vec_.begin() + i - 1);
+        alive_vec_.erase(alive_vec_.begin() + i - 1);
+      }
+    }
     ++tick_;
 
     if(debug || debug_env){
@@ -116,6 +137,7 @@ void Environment::tick(const int amount /* = 1 */){
 void Environment::contamination(const int amount){
   for (int i = 0; i < amount; ++i) {
     dots_vec_.push_back(Dot(start_dot_, false)); // "false" prevents copying of postion and direction
+    alive_vec_.push_back(true);
   }
 }
 
@@ -196,31 +218,9 @@ void Environment::searchFood(){
 }
 
 void Environment::cannibalism(){
-  std::cerr << __LINE__ << '\n';
-  // Remove food exactly below Dots first
-  std::vector<bool> remove_dot(dots_vec_.size(), false);
-  for (size_t i = 0; i < dots_vec_.size(); ++i){
-    if(dots_vec_[i].getPreyInSight()){
-      if(!(remove_dot[dots_vec_[i].getPreyInSightIdx()]) && dots_vec_[i].getPosition() == dots_vec_[dots_vec_[i].getPreyInSightIdx()].getPosition()){
-        dots_vec_[i].eat(500 + 0.3 * dots_vec_[dots_vec_[i].getPreyInSightIdx()].getEnergy());
-        remove_dot[dots_vec_[i].getPreyInSightIdx()] = true;
-      }
-    }
-  }
-  std::cerr << __LINE__ << '\n';
-  // Remove eaten dots
-  // dots_vec_.erase(remove_if(dots_vec_.begin(), dots_vec_.end(), [& remove_dot](std::pair<uint16_t, uint16_t> &dot){
-  //   return remove_dot[];
-  // }), dots_vec_.end());
-  for(size_t i = remove_dot.size(); i != 0; --i){
-    if(remove_dot[i - 1]){
-      dots_vec_.erase(dots_vec_.begin() + i - 1);
-    }
-  }
   for(size_t i = 0; i < dots_vec_.size(); ++i){
     dots_vec_[i].setPreyInSight(false);
   }
-  std::cerr << __LINE__ << '\n';
   // Calculate distance for the rest-food
   // Based on this answer: https://stackoverflow.com/a/59432406/12540220
   uint16_t grid_size = 50;
@@ -228,6 +228,9 @@ void Environment::cannibalism(){
   // Only save indices of Dots in dots_vec_
   std::vector<std::vector<std::vector<size_t> > > grid(grid_size, std::vector<std::vector<size_t> > (grid_size));
   for(size_t i = 0; i < dots_vec_.size(); ++i){
+    if (!alive_vec_[i]) {
+      continue;
+    }
     const std::pair<uint16_t, uint16_t>& dot_pos = dots_vec_[i].getPosition();
     const std::pair<uint16_t, uint16_t> grid_pos(dot_pos.first / grid_length, dot_pos.second / grid_length);
     uint16_t neighborhood = ceil(dots_vec_[i].getSight()/grid_length);
@@ -237,23 +240,28 @@ void Environment::cannibalism(){
       }
     }
   }
-  std::cerr << __LINE__ << '\n';
   for(size_t i = 0; i < dots_vec_.size(); ++i){
     const std::pair<uint16_t, uint16_t>& dot_pos = dots_vec_[i].getPosition();
     std::pair<uint16_t, uint16_t> grid_pos(dot_pos.first / grid_length, dot_pos.second / grid_length);
     for(size_t j = 0; j < grid[grid_pos.first][grid_pos.second].size(); ++j){
       Dot& dot = dots_vec_[grid[grid_pos.first][grid_pos.second][j]];
+      // if(dots_vec_[i] == dot){
+      //   continue;
+      // }
       uint16_t dist = distance(dot_pos, dot.getPosition(), testground_size_);
-      if(dist < dot.getSight()){
-        if(dots_vec_[i].getSize() > dot.getSize() * 1.1){
-          dots_vec_[i].newPrey(dot.getPosition(), i, dist);
-        } else if (dots_vec_[i].getSize() * 1.1 < dot.getSize()){
-          dots_vec_[i].newHazardSource(dot.getPosition(), dist);
+      if(dist == 0 && dots_vec_[i].getSize() * 1.1 < dot.getSize()){
+        dot.eat(500 + 0.3 * dots_vec_[i].getEnergy());
+        alive_vec_[i] = false;
+        break;
+      } else if(dist < dot.getSight()){
+        if(dots_vec_[i].getSize() * 1.1 < dot.getSize()){
+          dot.newPrey(dots_vec_[i].getPosition(), i, dist);
+        } else if (dots_vec_[i].getSize()> dot.getSize() * 1.1){
+          dot.newHazardSource(dots_vec_[i].getPosition(), dist);
         }
       }
     }
   }
-  std::cerr << __LINE__ << '\n';
 }
 
 //   // sort the Dot-vector controlled by the position of the Dots

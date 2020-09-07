@@ -125,6 +125,7 @@ void Dot::tick(){
   --reproduction_cooldown_;
 }
 
+
 Dot Dot::replicate(const double mutation_rate){
   uint16_t speed_change = max(1.0, (double)speed_ * mutation_rate);
   uint16_t sight_change = max(1.0, (double)sight_ * mutation_rate);
@@ -224,4 +225,8 @@ void Dot::setPreyInSight(bool prey_in_sight){
 
 std::size_t Dot::getPreyInSightIdx() const{
   return prey_in_sight_idx_;
+}
+
+void Dot::setPreyInSightIdx(size_t idx){
+  prey_in_sight_idx_ = idx;
 }

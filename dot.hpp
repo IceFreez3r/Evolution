@@ -50,6 +50,7 @@ public:
   bool getPreyInSight() const;
   void setPreyInSight(bool prey_in_sight);
   std::size_t getPreyInSightIdx() const;
+  void setPreyInSightIdx(std::size_t idx);
 
 private:
   // Constant properties
